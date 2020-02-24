@@ -34,3 +34,15 @@ div.sidebar {
 .book .book-body .page-wrapper .page-inner section.normal div.sidebar > :last-child {
   margin-bottom: 0;
 }
+
+/* For my solutions ---------------------------------------------*/
+
+.answer {
+  border-left: 4px solid #ffe5b4;
+  padding: 5px 20px 0 20px;
+  width: 95%;
+}
+
+.answer, p {
+  margin-bottom: 10px; /* adds a bit of white space after the div*/
+}
