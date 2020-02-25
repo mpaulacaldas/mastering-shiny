@@ -219,6 +219,14 @@ ui_screenshot(ui, "basic-ui/action")
     )
     ui_screenshot(ui, "basic-ui/placeholder")
     ```
+    
+    <div class="answer">
+    ```{r, eval = FALSE}
+    ui <- fluidPage(
+      textInput("your_name", NULL, placeholder = "Your name")
+    )
+    ```
+    </div>
 
 1.  Carefully read the documentation for `sliderInput()` to figure out how to 
     create a date slider, as shown below.
@@ -230,15 +238,82 @@ ui_screenshot(ui, "basic-ui/action")
     )
     ui_screenshot(ui, "basic-ui/date-slider")
     ```
+    
+    <div class="answer">
+    
+    We can provide dates to the `min`, `max` and `value` arguments of `fluidPage()`, and tweak the formatting with `timeFormat`.
+    
+    ```{r}
+    ui <- fluidPage(
+      sliderInput(
+        "delivery_date",
+        "When should we deliver?",
+        min = as.Date("2019-08-09"),
+        max = as.Date("2019-08-16"),
+        value = as.Date("2019-08-10"),
+        timeFormat = "%F" # the default for dates
+      )
+    )
+    ```
+    
+    Otherwise we would get an error:
+    
+    ```{r, error=TRUE}
+    ui <- fluidPage(
+      sliderInput(
+        "delivery_date",
+        "When should we deliver?",
+        min = "2019-08-09",
+        max = "2019-08-16",
+        value = "2019-08-10"
+      )
+    )
+    ```
+    
+    </div>
 
 1.  If you have a moderately long list, it's useful to create sub-headings that
     break the list up into pieces. Read the documentation for `selectInput()` 
     to figure out how. (Hint: the underlying HTML is called `<optgroup>`.)
+    
+    <div class="answer">
+    The solution is to create a named list. Using the example from the `?selectInput()`:
+    ```{r}
+    ui <- fluidPage(
+      selectInput(
+        "state",
+        "Choose a state:",
+        list(
+          "East Coast" = list("NYC", "NY", "CT"),
+          "West Coast" = list("WA", "OR", "CA"),
+          "Midwest" = list("MN", "WI", "IA")
+        )
+      )
+    )
+    ```
+    
+    </div>
 
 1.  Create a slider input to select values between 0 and 100 where the interval 
     between each selectable value on the slider is 5. Then, add animation to the 
     input widget so when the user presses play the input widget scrolls through 
     automatically.
+    
+    <div class="answer">
+    ```{r}
+    ui <- fluidPage(
+      sliderInput(
+        "slider",
+        NULL,
+        value = 50,
+        min = 0,
+        max = 100,
+        step = 5,
+        animate = TRUE
+        )
+      )
+    ```
+    </div>
 
 1.  Using the following numeric input box the user can enter any value between 
     0 and 1000. What is the purpose of the step argument in this widget?
@@ -246,6 +321,10 @@ ui_screenshot(ui, "basic-ui/action")
     ```{r eval=FALSE}
     numericInput("number", "Select a value", value = 150, min = 0, max = 1000, step = 50)
     ```
+    
+    <div class="answer">
+    The `step` argument controls the interval that is suggested when the user clicks on the arrows on the right side of the box. The user is however free to override the suggested values by typing a number directly into the box.
+    </div>
 
 ## Outputs {#outputs}
 
@@ -355,16 +434,60 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
 
 1.  Re-create the Shiny app from the plots section, this time setting height to 
     300px and width to 700px.
+    
+    <div class="answer">
+    ```{r}
+    ui <- fluidPage(
+      plotOutput("plot", width = "700px", height = "300px")
+    )
+    server <- function(input, output, session) {
+      output$plot <- renderPlot(plot(1:5))
+    }
+    ```
+    
+    </div>
 
 1.  Add an additional plot to the right of the existing plot, and size it so
     that each plot takes up half the width of the app.
+    
+    <div class="answer">
+    `r emo::ji("confused")`
+    
+    I gave up on this one. I have no idea how to make the plots go side-by-side without resorting to `fluidRow(column())`. I see that `plotOutput()` has an `inline` argument, but it returns `Error in pngfun: invalid quartz() device size`
+    
+    ```{r, eval = FALSE}
+    ui <- fluidPage(
+      plotOutput("plot", inline = TRUE),
+      plotOutput("plot2", inline = TRUE)
+    )
+    server <- function(input, output, session) {
+      output$plot <- renderPlot(plot(1:5))
+      output$plot2 <- renderPlot(plot(5:1))
+    }
+    ```
+    
+    This fails because the defaults of `width` and `height`, `"100%"` and `"400px"`, are not valid when `inline = TRUE`. These values can be set, but on the server side via `renderPlot()`. Note that in `renderPlot()` the arguments need to be provided as numeric and not character values.
+    
+    And even after all that, I still can't get the plots to show up side-by-side.
+    
+    ```{r, eval = FALSE}
+    ui <- fluidPage(
+      plotOutput("plot", inline = TRUE),
+      plotOutput("plot2", inline = TRUE)
+    )
+    server <- function(input, output, session) {
+      output$plot <- renderPlot(plot(1:5), height = 300, width = 350)
+      output$plot2 <- renderPlot(plot(5:1), height = 300, width = 350)
+    }
+    ```
+    </div>
 
 1.  Update the options for `renderDataTable()` below so that the table is 
     displayed, but nothing else, i.e. remove the search, ordering, and filtering
     commands. You'll need to read `?renderDataTable` and review the options 
     at <https://datatables.net/reference/option/>.
 
-    ```{r eval=FALSE}
+    ```{r eval=TRUE}
     ui <- fluidPage(
       dataTableOutput("table")
     )
@@ -372,6 +495,39 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
       output$table <- renderDataTable(mtcars, options = list(pageLength = 5))
     }
     ```
+    
+    <div class="answer">
+    The code above produces the following table:
+    
+    ```{r, echo = FALSE, out.width = NULL}
+    app_screenshot(
+      testApp(ui, server),
+      "basic-ui/sol-output-plot-datatable"
+      )
+    ```
+    
+    ```{r}
+    server <- function(input, output, session) {
+      output$table <- renderDataTable(
+        mtcars,
+        options = list(
+          pageLength = 5,
+          # removes both search box above table and filtering per column
+          searching = FALSE,
+          # removes arrows next to column names
+          ordering = FALSE
+          )
+        )
+    }
+    ```
+    
+    ```{r, echo = FALSE, out.width = NULL}
+    app_screenshot(
+      testApp(ui, server),
+      "basic-ui/sol-output-plot-datatable-no-search-order"
+      )
+    ```
+    </div>
 
 ## Layouts {#layout}
 
@@ -553,8 +709,55 @@ As you can see, theming your app is quite straightforward: you just need to use 
 1.  Modify the Central Limit Theorem app so that the sidebar is on the right 
     instead of the left.
     
+    <div class="answer">
+    ```{r}
+    ui <- fluidPage(
+      headerPanel("Central limit theorem"),
+      sidebarLayout(
+        position = "right",
+        sidebarPanel(
+          numericInput("m", "Number of samples:", 2, min = 1, max = 100)
+        ),
+        mainPanel(
+          plotOutput("hist")
+        )
+      )
+    )
+    ```
+    
+    ```{r, echo = FALSE, out.width = "100%"}
+    app <- testApp(ui, server)
+    Sys.sleep(0.5)
+    app_screenshot(app, "basic-ui/sol-sidebar-right", width = 800)
+    ```
+    </div>
+    
 1.  Browse the themes available in the shinythemes package, pick an attractive 
     theme, and apply it the Central Limit Theorem app.
+    
+    <div class="answer">
+    ```{r}
+    ui <- fluidPage(
+      headerPanel("Central limit theorem"),
+      theme = shinythemes::shinytheme("sandstone"),
+      sidebarLayout(
+        position = "right",
+        sidebarPanel(
+          numericInput("m", "Number of samples:", 2, min = 1, max = 100)
+        ),
+        mainPanel(
+          plotOutput("hist")
+        )
+      )
+    )
+    ```
+    
+    ```{r, echo = FALSE, out.width = "100%"}
+    app <- testApp(ui, server)
+    Sys.sleep(0.5)
+    app_screenshot(app, "basic-ui/sol-theme-sandstone", width = 800)
+    ```
+    </div>
 
 <!--
 
