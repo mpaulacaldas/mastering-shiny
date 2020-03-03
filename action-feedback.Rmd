@@ -191,6 +191,10 @@ server <- function(input, output, session) {
 }
 ```
 
+<div class="answer">
+Both `exists()` and `cancelOutput = TRUE` are `r emo::ji("ok_hand")`
+</div>
+
 ### Validate output
 
 shinyFeedback is great when the problem is related to a single input. But sometimes the invalid state is a result of a combination of inputs. In this case it doesn't really make sense to put the error next to an input (which one would you put it beside?) and instead it makes more sense to put it in the output. 
@@ -218,6 +222,26 @@ server <- function(input, output, server) {
   })
 }
 ```
+
+<div class="answer">
+A pattern that I have seen more often is `validate(need(...))`. Note that with this syntax we have to negate the logical condition defined before.
+```{r, eval = FALSE}
+server <- function(input, output, server) {
+  output$out <- renderText({
+    validate(need(
+      !(input$x < 0 && input$trans %in% c("log", "square-root")),
+      "x can not be negative for this transformation"
+    ))
+    
+    switch(input$trans,
+      square = input$x ^ 2,
+      "square-root" = sqrt(input$x),
+      log = log(input$x)
+    )
+  })
+}
+```
+</div>
 
 ## Notifications
 
@@ -300,6 +324,12 @@ server <- function(input, output, session) {
 ```
 
 Generally, these sort of notifications will live in a reactive, because that ensures that the long-running task is only re-run when absolutely needed.
+
+<div class="answer">
+This is a useful and efficient pattern. Previously, I would have probably used an `observeEvent()` to remove the notification once the import of the file was successful. This approach is better, although I am not 100% clear on why we have to set `add = TRUE`. 
+
+Also, what are the other Shiny functions that return the object's ID? This seems like a useful pattern, but I don't see it documented elsewhere (like `showModal()`, for example).
+</div>
 
 ### Progressive updates
 
@@ -524,6 +554,10 @@ There are a few small, but important, details to consider when creating a dialog
 * Can you make the dangerous option more obvious? Here I've used 
   `class = "btn btn-danger"` to style the button prominently.
   
+  <div class="answer">
+  `r emo::ji("gem")` More CSS options for buttons at <https://www.w3schools.com/bootstrap/bootstrap_ref_css_buttons.asp>.
+  </div>
+  
 Jakob Nielsen has more good advice at <http://www.useit.com/alertbox/ok-cancel.html>.
 
 Let's use this dialog in a real (if very simple) app. Our UI exposes a single button to "delete all the files":
@@ -624,6 +658,65 @@ server <- function(input, output, session) {
   })
 }
 ```
+
+<div class="answer">
+Here are some comments explaining what I *think* is going on.
+```{r}
+runLater <- function(action, seconds = 3) {
+  observeEvent(
+    # eventExpr -> invalidate after 3 seconds
+    invalidateLater(seconds * 1000), 
+    # handlerExpr -> called when the event is invalidated
+    action, 
+    # ignore the handlerExpr (action) the first time it is created
+    ignoreInit = TRUE, 
+    # destroy after the handlerExpr (action) is run for the first time
+    once = TRUE, 
+    # the action should be triggered even if the eventExpr is NULL
+    ignoreNULL = FALSE,
+    # don't auto destroy after the domain ends
+    autoDestroy = FALSE
+  )
+}
+
+server <- function(input, output, session) {
+  waiting <- NULL
+  last_message <- NULL
+  
+  observeEvent(input$tweet, {
+    notification <- glue::glue("Tweeted '{input$message}'")
+    # assignment to the global environment, could be replaced with a
+    # reactiveValues object?
+    last_message <<- input$message
+    # remove the message from the text area
+    updateTextAreaInput(session, "message", value = "")
+
+    showNotification(
+      notification,
+      action = actionButton("undo", "Undo?"),
+      duration = NULL,
+      closeButton = FALSE,
+      id = "tweeted",
+      type = "warning"
+    )
+    
+    # weird to use assignement with an observeEvent() instead of an
+    # eventReactive()
+    waiting <<- runLater({
+      cat("Actually sending tweet...\n")
+      removeNotification("tweeted")
+    })
+  })
+  
+  observeEvent(input$undo, {
+    # how does this work? can we just call $destroy()  on random objects?
+    waiting$destroy()
+    showNotification("Tweet retracted", id = "tweeted")
+    updateTextAreaInput(session, "message", value = last_message)
+  })
+}
+```
+</div>
 
 ### Trash
 
