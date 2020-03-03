@@ -172,7 +172,7 @@ knitr::include_graphics("screenshots/basic-case-study/prototype.png", dpi = scre
 
 Now that we have the basic components in place and working, we can progressively improve our app. The first problem with this app is that it shows a lot of information in the tables, where we probably just want the highlights. To fix this we need to first figure out how to truncate the tables. I've chosen to do that with a combination of forcats functions: I convert the variable to a factor, order by the frequency of the levels, and then lump together all levels after the top 5. 
 
-```{r}
+```{r lump-infreq}
 injuries %>%
   mutate(diag = fct_lump(fct_infreq(diag), n = 5)) %>%
   group_by(diag) %>%
@@ -253,15 +253,119 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
 
 1.  Draw the reactive graph for each app.
 
+    <div class="answer">
+    `neiss/prototype.R` and `neiss/polish-tables.R` share the same reactive graph.
+    ```
+    input$code+---->selected()+--->output$diag
+                              |
+                              |
+                              |--->output$body_part
+                              |
+                              |
+                              |--->output$location
+                              |
+                              |
+                              +--->summary()+--------> output$age_sex
+    ```
+    
+    In `neiss/rate-vs-count.R` the plot output takes a reactive dependency on a new input, `input$y`.
+    ```
+    input$code+---->selected()+--->output$diag
+                              |
+                              |
+                              |--->output$body_part
+                              |
+                              |
+                              |--->output$location
+                              |
+                              |
+                              +--->summary()-+
+                                             |
+            +--------------------------------+--->output$age_sex
+            |
+    input$y-+
+    ```
+    
+    `neiss/narrative.R` adds a new input, `input$story` which together with `selected()`, control `output$narrative`.
+    ```
+    input$story+--------------+--->output$narrative
+                              |
+                              |
+    input$code+---->selected()+--->output$diag
+                              |
+                              |
+                              |--->output$body_part
+                              |
+                              |
+                              |--->output$location
+                              |
+                              |
+                              +--->summary()-+
+                                             |
+            +--------------------------------+--->output$age_sex
+            |
+    input$y-+
+    ```
+    </div>
+
 1.  What happens if you flip `fct_infreq()` and `fct_lump()` in the code that 
     reduces the summary tables?
+    
+    <div class="answer">
+    As a reminder, this is what `fct_lump(fct_infreq(...), n = 5)` returns on the `injuries` table.
+    ```{r, ref.label="lump-infreq"}
+    ```
+    
+    Reversing the order of the functions results in:
+    ```{r}
+    injuries %>% 
+      mutate(diag = fct_infreq(fct_lump(diag, n = 5))) %>% 
+      group_by(diag) %>% 
+      summarise(n = as.integer(sum(weight)))
+    ```
+    
+    The reason why `Other` jumps to the front of the list is because we ordered our factors with respect to their frequency *after* we had already reduced the number of factors. Therefore, the factor level `Other`, which is an aggregation of smaller groups, immediately jumped to the top of the list because it is the factor with the most observations.
+    </div>    
 
 1.  Add an input control that lets the user decide how many rows to show in the
     summary tables.
+    
+    <div class="answer">
+    
+    First, I added a `numericInput()` to the UI.
+    ```{r, code = section_get("neiss/sol-summary-rows.R", "first-row"), eval = FALSE}
+    ```
+    
+    I then created a reactive with the number of factors that would be passed on to the `n` argument of `count_top()`.
+    
+    ```{r, code = section_get("neiss/sol-summary-rows.R", "n-factors"), eval = FALSE}
+    ```
+    
+    And passed the reactive to the `count_top()` function in each one of the summary table outputs.
+    
+    ```{r, code = section_get("neiss/sol-summary-rows.R", "tables"), eval = FALSE}
+    ```
+    
+    </div>
 
 1.  Provide a way to step through every narrative systematically with forward
     and backward buttons. 
     
     Advanced: Make the list of narratives "circular" so that advancing 
     forward from the last narrative takes you to the first.
+    
+    <div class="answer">
+    First, I added two buttons to the UI.
+    ```{r, code = section_get("neiss/sol-loop-narrative.R", "narrative-ui"), eval = FALSE}
+    ```
+    
+    I then created an index which (mostly) takes the difference between the inputs of the two buttons. I stored this value in a reactive, which is later used to slice the vector of narrations in `output$narrative`.
+    
+    I also controlled for two conditions in this reactive. First, if the index is negative (which can happen when we click too many times on the "Previous story" button), I begin counting backwards from the last element of the vector. Second, if the index is greater than the number of rows, then I go back to the beginning.
+    
+    These rules are "good enough" for now, but they still break under edge cases. Right now, I can't think of a way of making them more robust without resorting to more complex Shiny code.
+    
+    ```{r, code = section_get("neiss/sol-loop-narrative.R", "narrative-server"), eval = FALSE}
+    ```
+    </div>
 
