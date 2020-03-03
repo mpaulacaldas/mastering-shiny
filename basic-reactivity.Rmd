@@ -289,8 +289,53 @@ This concept is very important and different to most other R code, so I'll say i
       b <- reactive(a() + input$b)
     }
     ```
+    
+    <div class="answer">
+    Made with <http://stable.ascii-flow.appspot.com/#>.
+    ```
+    input$a+
+           |
+           +------>c()
+           |        +
+    input$b+        |
+                    +---->e()+----->output$e
+                    |
+    input$d+--------+
+    ```
+    
+    ```
+    input$x1-+
+             |
+             |
+    input$x2-+----->x()-+
+             |          |
+             |          |
+    input$x3-+          |
+                        +--> output$z
+    input$y1-+          |
+             |          |
+             +----> y()-+
+             |
+    input$y2-+
+    ```
+    
+    ```
+    input$a+-->a()-+
+                   |
+    input$b+-------+->b()-+
+                          |
+    input$c+--------------+->c()-+
+                                 |
+    input$d+---------------------+->d()
+    ```
+    
+    </div>
 
 1.  Can the reactive graph contain a cycle? Why/why not?
+    
+    <div class="answer">
+    No, it is not possible for a reactive graph to contain a cycle. Since the execution order is determined solely by the reactive graph, Shiny won't know where to start if it ever encounters a reactive component that depends upon itself (either directly or indirectly). We could, however, tell Shiny that a reactive object depends upon *previous* values of the same reactive. One common way of doing this is to use `isolate()` and `reactiveValues()` objects.
+    </div>
 
 ## Reactive expressions
 
