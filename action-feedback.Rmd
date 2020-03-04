@@ -118,7 +118,9 @@ server <- function(input, output, session) {
 ```
 
 ```{r require-simple, echo = FALSE, message = FALSE, cache = FALSE, fig.cap = "The app displays an uninformation error when it is loaded because language hasn't been selected yet", out.width = "50%", fig.show = "hold"}
-knitr::include_graphics("demos/require-simple/screenshot.png")
+demo <- demo_inline("require-simple", ui, server)
+demo$resize(400)
+demo$screenshot()
 ```
 
 We can fix this problem by using `req()`, as below. Now nothing will be displayed until the user has suppled values for both language and name, as shown in Figure \@ref(fig:require-simple2).
@@ -137,9 +139,13 @@ server <- function(input, output, session) {
 ```
 
 ```{r require-simple2, fig.cap = "By using `req()`, the output is only shown once both language and name have been supplied", out.width = "33%", fig.show = "hold", fig.align = "default", echo = FALSE, message = FALSE, cache = FALSE}
-s1 <- "demos/require-simple2/on-load.png"
-s2 <- "demos/require-simple2/langauge.png"
-s3 <- "demos/require-simple2/name.png"
+demo <- demo_inline("require-simple2", ui, server)
+demo$resize(400)
+s1 <- demo$screenshot("on-load")
+demo$set_values(language = "English")
+s2 <- demo$screenshot("langauge")
+demo$set_values(name = "Hadley")
+s3 <- demo$screenshot("name")
 knitr::include_graphics(c(s1, s2, s3))
 ```
 
