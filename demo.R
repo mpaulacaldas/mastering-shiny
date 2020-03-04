@@ -39,7 +39,7 @@ demoApp <- R6::R6Class("demoApp", public = list(
     self$data <- data
 
     fs::dir_create(self$path())
-    self$run()
+    # self$run()
   },
 
   run = function() {
