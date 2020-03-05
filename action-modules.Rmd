@@ -127,6 +127,10 @@ ui <- fluidRow(
 
 If you're comfortable with functional programming, you could reduce the code still further as below. htmltools (the package that provides the underlying html code to Shiny) supports tidy dots only in the development version. `fluidRow(!!!list(a, b))` is equivalent to `fluidRow(a, b)`. This technique is sometimes called splatting because you're splatting the elements of a list into the arguments of a function.
 
+<div class="answer">
+`r emo::ji("exploding_head")` Splatting!
+</div>
+
 ```{r}
 if (packageVersion("htmltools") >= "0.3.6.9004") {
   vars <- c("alpha", "beta", "gamma", "delta")
@@ -273,6 +277,10 @@ filter(ngo, !!!select)
 
 Don't worry if this all looks like gibberish: you can just use copy and paste instead. 
 
+<div class="answer">
+I think I did something like this once, using `filter_at()` to get around the NSE.
+</div>
+
 ## Using modules
 
 Functions are great but they're effectively only useful for exracting out pure UI code or pure computation used inside reactives. They don't help (why?) if you want to build more complicated components that link UI and server.
@@ -284,6 +292,10 @@ Modules are way to create an app within an app. They force isolation of behaviou
 ### Without modules
 
 To illustrate why we need modules, and can't just use regular functions, consider the following simple app. It allows the user to input their birthday as a string: this is a little faster than using a `dateInput()` since there's no need to scroll through a calendar. But it means that we need to check that they've entered a correct date and give an informative message if they haven't.
+
+<div class="answer">
+Why not use `validate(need(...))` here?
+</div>
 
 ```{r}
 library(lubridate)
@@ -415,6 +427,10 @@ ymdInputUI <- function(id, label) {
 
 The key idea is that the argument to `NS()` is supplied by the person using the component, and the arguments to the function it produces is supplied by the person who wrote the component. This two-phase creation ensures that the final name combines properties needed by both the app author and the module author. This is a bit confusing at first, because you're likely to be both the app and module author.
 
+<div class="answer">
+`r emo::ji("confused")` I don't get it.
+</div>
+
 We now need to specify an `id` when creating the UI. This is important because it puts this id in the same place as all the others, so it's easy to spot if you've used the same input id in multiple places. 
 
 ```{r}
@@ -445,6 +461,10 @@ ymdInput <- function(id) {
 }
 ```
 
+<div class="answer">
+`r emo::ji("question")` Do we always have to wrap `callModule()` with a function?
+</div>
+
 (You may have seen modules used a little differently elsewhere. But I think this organisation makes it easier to understand what's going on.)
 
 Now the arguments to `ymdInput()` have changed: we pass in the `id`, and Shiny takes care of automatically plumbing up the input, output, and session in the appropriate namespaced way. That why I've removed the `Server` from the name - since the details are hidden from the interface.
@@ -468,6 +488,10 @@ server <- function(input, output, session) {
 To help cement the ideas of modules in your head, the following case studies use module to develop a few simple reusable components.
 
 ### Limited selection + other
+
+<div class="answer">
+Cool way to mix `radioButtons()` with `selectInput()`.
+</div>
 
 Consider the following app, which provdies a way to select gender that is sensitive to the many possible ways that people can express their gender.[^gender]
 
@@ -511,6 +535,14 @@ server <- function(input, output, session) {
 The `gender` and `gender_self` components are tightly bound together. We haven't talked about `updateRadioButtons()` yet, but this is just a small convenience so that if you start typing a self-described gender, that radio button is automatically selected.
 
 Convert to a module and generalise a little.
+
+<div class="answer">
+`r emo::ji("exploding_head")` `unname()`
+
+`r emo::ji("question")` Why do we have to wrap `textInput()` with `list()`? Also, confusing that now we use `callModule()` on the server side (although I agree it looks better) and that we have `ns("other")` and `"other"`.
+
+`r emo::ji("bug")` In the app with the module, it is imposible to change to another option after writing something out in the `textInput()`. This was not an issue in the previous app.
+</div>
 
 ```{r}
 radioButtonsWithOther <- function(id, label, choices, selected = NULL, placeholder = NULL) {
@@ -657,12 +689,74 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 ```
 
+    <div class="answer">
+    ```{r}
+    selectInputXY <- function(inputId, selected, ...) {
+      selectInput(
+        inputId = inputId,
+        label = paste0(toupper(inputId), "-axis:"),
+        choices = c(
+          "sleep_total",
+          "sleep_rem",
+          "sleep_cycle",
+          "awake",
+          "brainwt",
+          "bodywt"
+          ),
+        selected = selected,
+        ...
+      )
+    }
+    
+    ui <- fluidPage(
+      selectInputXY(inputId = "x", selected = "sleep_rem"),
+      selectInputXY(inputId = "y", selected = "sleep_total"),
+      tabsetPanel(
+        id = "vore",
+        tabPanel("Carnivore", plotOutput("plot_carni")),
+        tabPanel("Omnivore", plotOutput("plot_omni")),
+        tabPanel("Herbivore", plotOutput("plot_herbi")))
+      )
+    ```
+    </div>
+
 2. Continue working with the same app from the previous exercise, and further 
    remove redundancy in the code by modularizing how subsets and plots are 
    created.
    
+   <div class="answer">
+   I can't figure out how to do it with a module. Here is an approach that works, with the disadvantage that it is not associated with the UI code.
+   
+    ```{r}
+    server <- function(input, output, session) {
+    
+      createGgplotVore <- function(myvore, input_x = input$x, input_y = input$y) {
+        
+        output_name <- paste0("plot_", myvore)
+        
+        output[[output_name]] <- renderPlot({
+          vore_df <- filter(msleep, vore == myvore)
+          ggplot(data = vore_df, aes_string(x = input_x, y = input_y)) +
+            geom_point()
+        })
+        
+      }
+      
+      createGgplotVore("carni")
+      createGgplotVore("omni")
+      createGgplotVore("herbi")
+    
+    }
+    ```
+   
+   </div>
+   
 3. Suppose you have an app that is slow to launch when a user visits it. Can  
    modularizing your app code help solve this problem? Explain your reasoning.
+   
+   <div class="answer">
+   **TODO**
+   </div>
 
 ## Packages
 
