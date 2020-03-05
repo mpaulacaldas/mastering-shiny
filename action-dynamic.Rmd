@@ -155,6 +155,10 @@ ui <- fluidPage(
 )
 ```
 
+<div class="answer">
+This strategy is smart (i.e. setting `choices = NULL` to then dynamically update the options). Previously, I would have created the select inputs on the server side and updated the choices there. I think Hadley's approach makes the UI a litte more cluttered (the boxes are there even if you can't use them), but it communicates the range of options better to the user. I also like the fact that it leaves most of the UI code in the ui script.
+</div>
+
 In the server function, I work top-down:
 
 1.  I create a reactive, `territory()`, that contains the rows from `sales` 
@@ -215,6 +219,16 @@ demo$deploy()
 ```
 
 Try out this simple example at `r demo$link()`, or see a more fully fleshed out application at <https://github.com/hadley/mastering-shiny/tree/master/sales-dashboard>.
+
+<div class="answer">
+The fully fleshed out application can be run from the present repo using:
+
+```{r, eval = FALSE}
+shiny::runApp("sales-dashboard/app.R")
+```
+
+I particularly like the use of `selectInput(..., selectize = FALSE, size  = 5)`, which changes the appearance of the select input: it creates a larger box that displays 5 options at a time.
+</div>
 
 ### Circular references
 
@@ -294,6 +308,19 @@ There's no way around this problem because you have one idea (the temperature) w
     )
     ```
     
+    <div class="answer">
+    I also update the default `value` to January 1st of the year defined `input$year`.
+    ```{r}
+    server <- function(input, output, session) {
+      observeEvent(input$year, {
+        jan01 <- lubridate::make_date(input$year, 1, 1)
+        dec31 <- lubridate::make_date(input$year, 12, 31)
+        updateDateInput(session, "date", value = jan01, min = jan01, max = dec31)
+      })
+    }
+    ```
+    </div>
+    
 1.  Complete the user interface below with a server function that updates
     `input$county` choices based on `input$state`. For an added challenge,
     also change the label from "County" to "Parrish" for Louisana and 
@@ -308,6 +335,26 @@ There's no way around this problem because you have one idea (the temperature) w
       selectInput("county", "County", choices = NULL)
     )
     ```
+    
+    <div class="answer">
+    ```{r}
+    server <- function(input, output, session) {
+      observeEvent(input$state, {
+        updateSelectInput(
+          session,
+          "county",
+          label = switch(
+            input$state,
+            "Louisiana" = "Parrish",
+            "Alaska" = "Borrough",
+            "County"
+          ),
+          choices = county$name[county$state == input$state]
+        )
+      })
+    }
+    ```
+    </div>
 
 1.  Complete the user interface below with a server function that updates
     `input$country` choices based on the `input$continent`. Use 
@@ -323,13 +370,105 @@ There's no way around this problem because you have one idea (the temperature) w
       tableOutput("data")
     )
     ```
+    
+    <div class="answer">
+    ```{r}
+    server <- function(input, output, session) {
+      
+      continent <- reactive({
+        req(input$continent)
+        subset(gapminder, continent == input$continent)
+      })
+      
+      observeEvent(continent(), {
+        updateSelectInput(
+          session,
+          "country",
+          choices = unique(continent()$country)
+        )
+      })
+      
+      output$data <- renderTable({
+        subset(continent(), country == input$country)
+      })
+    }
+    ```
+    </div>
 
 1.  Extend the previous app so that you can also choose to select no continent,
     and hence see all countries. You'll need to add `""` to the list of
     choices, and then handle that specially when filtering.
+    
+    <div class="answer">
+    ```{r}
+    ui <- fluidPage(
+      selectInput("continent", "Continent", choices = c("", levels(continents))), 
+      selectInput("country", "Country", choices = NULL),
+      tableOutput("data")
+    )
+    
+    server <- function(input, output, session) {
+      
+      continent <- reactive({
+        if (input$continent == "") return(gapminder)
+        subset(gapminder, continent == input$continent)
+      })
+      
+      observeEvent(continent(), {
+        updateSelectInput(
+          session,
+          "country",
+          choices = unique(continent()$country)
+        )
+      })
+      
+      output$data <- renderTable({
+        subset(continent(), country == input$country)
+      })
+    }
+    ```
+    
+    Some remarks:
+    - We remove `req(input$continent)` because an empty string (`""`) is considereda "falsy" value by `req()`.
+    - `continents` needs to be coerced into a character string before combining it with `""`. Otherwise, we get numeric values in the select input.
+    
+    </div>
 
 1.  What is at the heart of the problem described at 
     <https://community.rstudio.com/t/29307>?
+    
+    <div class="answer">
+    Here is the app provided in the question, slightly modified for readability:
+    ```{r, eval = FALSE}
+    library(shiny)
+    
+    ui <- fluidPage(
+      titlePanel("Mutually Dependent Input Values"),
+      numericInput("a", "A", .333),
+      numericInput("b", "B", .333),
+      numericInput("c", "C", .333)
+    )
+    
+    server <- function(input, output,session) {
+      observeEvent(input$a, {
+        updateNumericInput(session, "b", value = 1 - input$a - input$c) 
+        updateNumericInput(session, "c", value = 1 - input$a - input$b) 
+      })
+      observeEvent(input$b, {
+        updateNumericInput(session, "c", value = 1 - input$b - input$a) 
+        updateNumericInput(session, "a", value = 1 - input$b - input$c) 
+      })
+      observeEvent(input$c, {
+        updateNumericInput(session, "a", value = 1 - input$c - input$b) 
+        updateNumericInput(session, "b", value = 1 - input$c - input$c) 
+      })
+    }
+    
+    shinyApp(ui, server)
+    ```
+    
+    The problem here is that we have inter-related inputs: setting `input$a == .333` (i.e. the value at start-up), triggers a change in `input$a`, `input$b` and `input$c` *at the same time*, which in itself triggers another chain of updates from the same inputs.
+    </div>
 
 ## Dynamic visibility
 
@@ -632,6 +771,33 @@ knitr::include_graphics(c(s1, s2, s3))
 demo$deploy()
 ```
 
+<div class="answer">
+The app shown before returns the following warning upon start-up:
+
+```r
+#> Warning: Error in : Result 1 must be a single string, not NULL of length 0
+```
+
+This is because at start-up Shiny tries to create the `output$palette` *before* the `col_names()` inputs have been created (i.e. `input$col1`, `input$col2`, etc.).
+
+I think it is bad practice to leave warnings unaddressed in Shiny apps because they make debugging more difficult. This is how I would adjust the code to get rid of the warning:
+
+```{r}
+server <- function(input, output, session) {
+  col_names <- reactive(paste0("col", seq_len(input$n)))
+  
+  output$col <- renderUI({
+    map(col_names(), ~ textInput(.x, NULL))
+  })
+  
+  output$palette <- renderText({
+    req(all(col_names() %in% names(input)))
+    map_chr(col_names(), ~ input[[.x]])
+  })
+}
+```
+</div>
+
 If you run this app, you'll discover a really annoying behaviour: whenever you change the number of colours, all the data you've entered disappears. We can fix this problem by using the same technique as before: setting `value` to the (isolated) current value. I'll also tweak the appearance to look a little nicer, including displaying the selected colours in a plot. Sample screenshots are shown in Figure \@ref(fig:render-palette-full).
 
 ```{r}
@@ -683,6 +849,47 @@ s2 <- demo$screenshot("change-n")
 knitr::include_graphics(c(s1, s2))
 demo$deploy()
 ```
+
+<div class="answer">
+Again, here is how I would tweak the code to prevent all warnings. Note that I removed the `%||‰ ""` condition inside `output$col` because I don't know why it's there and I see no problems when I remove it.
+```{r}
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("n", "Number of colours", value = 5, min = 1),
+      uiOutput("col"),
+    ),
+    mainPanel(
+      plotOutput("plot")  
+    )
+  )
+)
+server <- function(input, output, session) {
+  col_names <- reactive(paste0("col", seq_len(input$n)))
+  
+  output$col <- renderUI({
+    map(col_names(), ~ textInput(.x, NULL, value = isolate(input[[.x]])))
+  })
+  
+  output$plot <- renderPlot({
+    
+    req(all(col_names() %in% names(input))) # inputs must exist
+    
+    cols <- map_chr(col_names(), ~ input[[.x]])
+    cols <- cols[cols %in% colors()] # colors must be valid
+    
+    req(length(cols) > 0) # vector has appropriate length
+    
+    barplot(
+      rep(1, length(cols)), 
+      col = cols,
+      space = 0, 
+      axes = FALSE
+    )
+  })
+}
+```
+</div>
 
 ### Dynamic filtering
 
@@ -856,15 +1063,170 @@ demo$deploy()
     How could you instead implement it using dynamic visibility? If you
     implement dynamic visiblity, how could you keep the values in sync when
     you change the controls?
+    
+    <div class="answer">
+    This was my first attempt. I wanted to see if I could create the two inputs in the UI side and give them the same name. It turns out that, in theory, I *can* (the app *looks* fine and I get no warnings), but the value of `input$n` is the one from the input first defined in the page (the slider, in this case).
+    ```{r}
+    ui <- fluidPage(
+      tags$style("#switcher { display:none; }"),
+      selectInput("type", "type", c("slider", "numeric")),
+      tabsetPanel(
+        id = "switcher",
+        tabPanel(
+          "slider", 
+          sliderInput("n", "n", value = 0, min = 0, max = 100)
+        ),
+        tabPanel(
+          "numeric",
+          numericInput("n", "n", value = 0, min = 0, max = 100)
+        )
+      )
+    )
+    
+    server <- function(input, output, session) {
+      observeEvent(input$type, {
+        updateTabsetPanel(session, "switcher", selected = input$type)
+      })
+      observe(print(input$n))
+    }
+    ```
+    
+    The solution is thus to create the inputs in the UI, making sure to give them a unique identifier:
+    ```{r}
+    ui <- fluidPage(
+      tags$style("#switcher { display:none; }"),
+      selectInput("type", "type", c("slider", "numeric")),
+      tabsetPanel(
+        id = "switcher",
+        tabPanel(
+          "slider", 
+          sliderInput("s", "n", value = 0, min = 0, max = 100)
+        ),
+        tabPanel(
+          "numeric",
+          numericInput("n", "n", value = 0, min = 0, max = 100)
+        )
+      )
+    )
+    ```
+    
+    To keep the values in sync, I use `switch()` and `isolate()` to update the value of the input in the active window with respect to the last value of the input in the inactive window.
+    ```{r}
+    server <- function(input, output, session) {
+      observeEvent(input$type, {
+        updateTabsetPanel(session, "switcher", selected = input$type)
+        switch(
+          input$type,
+          "numeric" = updateNumericInput(session, "n", value = isolate(input$s)),
+          "slider" = updateSliderInput(session, "s", value = isolate(input$n))
+        )
+      })
+    }
+    ```
+    </div>
 
 1.  Add support for date and date-time columns `make_ui()` and `filter_var()`.
+
+    <div class="answer">
+    There is no straight-forward way to deal with the date-time columns, since [Shiny does not currently support date-time input](https://github.com/rstudio/shiny/issues/897). The [shinyTime](https://github.com/burgerga/shinyTime) package adds a time-input, but we can't use it to filter date-time columns without creating an additional date-input. For simplicity, I will treat date and date-time columns the same way in `make_ui()`.
+    
+    ```{r}
+    make_ui <- function(x, var) {
+      if (is.numeric(x)) {
+        rng <- range(x, na.rm = TRUE)
+        sliderInput(var, var, min = rng[1], max = rng[2], value = rng)
+      } else if (is.factor(x)) {
+        levs <- levels(x)
+        selectInput(var, var, choices = levs, selected = levs, multiple = TRUE)
+      } else if (lubridate::is.Date(x) || lubridate::is.POSIXct(x)) {
+        rng <- range(x, na.rm = TRUE)
+        dateRangeInput(
+          var, var, 
+          min = rng[1], max = rng[2], start = rng[1], end = rng[2]
+          )
+      } else {
+        # Not supported
+        NULL
+      }
+    }
+    ```
+    
+    In `filter_var()`, I only have to make sure that date and date-time columns are filtered in the same way as numeric columns.
+    ```{r}
+    filter_var <- function(x, val) {
+      if (is.numeric(x) || lubridate::is.Date(x) || lubridate::is.POSIXct(x)) {
+        !is.na(x) & x >= val[1] & x <= val[2]
+      } else if (is.factor(x)) {
+        x %in% val
+      } else {
+        # No control, so don't filter
+        TRUE
+      }
+    }
+    ```
+    
+    We can't test this out with the previous app since none of the data frames in the datasets package contain date or date-time columns:
+    
+    ```{r}
+    dfs_ls <- mget(dfs, envir = as.environment("package:datasets"))
+    dfs_ls %>%
+      map(
+        ~ map_lgl(.x, ~ lubridate::is.Date(.x) | lubridate::is.POSIXct(.x))
+        ) %>% 
+      map_lgl(any) %>% 
+      any()
+    ```
+    
+    I will therefore use the `lakers` data set from `lubridate`, doing some processing to get the columns in the right format.
+    
+    ```{r, message = FALSE}
+    library(dplyr)
+    library(lubridate)
+    
+    lakers <- lubridate::lakers %>% 
+      mutate(
+        time = ymd_hm(paste0(date, time)),
+        date = ymd(date),
+      ) %>% 
+      mutate_if(is.character, factor)
+    
+    ui <- fluidPage(
+      sidebarLayout(
+        sidebarPanel(
+          map(names(lakers), ~ make_ui(lakers[[.x]], .x))
+        ),
+        mainPanel(
+          tableOutput("data")
+        )
+      )
+    )
+    server <- function(input, output, session) {
+      selected <- reactive({
+        each_var <- map(names(lakers), ~ filter_var(lakers[[.x]], input[[.x]]))
+        reduce(each_var, `&`)
+      })
+      
+      # TODO: Format the date and date-time columns for better printing
+      output$data <- renderTable(head(lakers[selected(), ], 12))
+    }
+    ```
+    
+    </div>
     
 1.  (Advanced) If you know the [S3 OOP](http://adv-r.hadley.nz/S3.html) system,
     consider how you could replace the `if` blocks in `make_ui()` and
     `filter_var()` with generic functions.
+    
+    <div class="answer">
+    **TODO**
+    </div>
 
 1.  (Hard) Make a wizard that allows the user to upload their own dataset.  
     The first page should handle the upload. The second should handle reading
     it, providing one drop down for each variable that lets the user select
     the column type. The third page should provide some way to get a summary
     of the dataset.
+    
+    <div class="answer">
+    **TODO**
+    </div>
