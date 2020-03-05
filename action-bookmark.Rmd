@@ -31,7 +31,7 @@ shinyApp(ui, server, enableBookmarking = "url")
 
 ### Updating the url
 
-```{r}
+```{r, eval = FALSE}
 # Automatically boomark every time an input changes
 observe({
   reactiveValuesToList(input)
