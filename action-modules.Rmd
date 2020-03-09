@@ -537,11 +537,17 @@ The `gender` and `gender_self` components are tightly bound together. We haven't
 Convert to a module and generalise a little.
 
 <div class="answer">
-`r emo::ji("exploding_head")` `unname()`
+`r emo::ji("exploding_head")` `unname()`. So useful.
 
-`r emo::ji("question")` Why do we have to wrap `textInput()` with `list()`? Also, confusing that now we use `callModule()` on the server side (although I agree it looks better) and that we have `ns("other")` and `"other"`.
+`r emo::ji("warning")` We need to wrap `textInput()` with `list()`. Otherwise, we get the following error:
 
-`r emo::ji("bug")` In the app with the module, it is imposible to change to another option after writing something out in the `textInput()`. This was not an issue in the previous app.
+```r
+#> Error in normalizeChoicesArgs(choices, choiceNames, choiceValues) : 
+#>  `choiceNames` and `choiceValues` must have the same length.
+```
+
+`r emo::ji("bug")` In the app with the module, it is imposible to change to another option after writing something out in the `textInput()`. This was not an issue in the previous app. Keep an eye out for <https://github.com/hadley/mastering-shiny/pull/138>.
+
 </div>
 
 ```{r}
