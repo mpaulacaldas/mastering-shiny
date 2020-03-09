@@ -20,11 +20,12 @@ rmd_files:
     "action.Rmd",
     "action-workflow.Rmd",
     "action-feedback.Rmd",
-    "action-transfer.Rmd",
     "action-dynamic.Rmd",
+    "action-transfer.Rmd",
+    "action-bookmark.Rmd",
+    "action-functions.Rmd",
     "action-modules.Rmd",
     "action-tidy.Rmd",
-    "action-bookmark.Rmd",
 
     "advanced-ui.Rmd",
 
