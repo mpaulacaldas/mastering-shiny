@@ -121,10 +121,6 @@ Note that here we return the UI components in a list; that means they will get i
 
 Next we tackle the server function. This gets wrapped inside _another_ function which must have an `id` argument. This function calls `moduleServer()` with the `id`, and a function that looks like a regular server function:
 
-<div class="answer">
-`r emo::ji("exploding_head")` Splatting!
-</div>
-
 ```{r}
 histogramServer <- function(id) {
   moduleServer(id, function(input, output, server) {
@@ -253,7 +249,6 @@ Roxygen documentation conventions are worthwhile even if you don't use roxygen2.
 
 
 How to return multiple values? Return a list of reactives.
->>>>>>> master
 
 Side bar with zeallot example.
 
