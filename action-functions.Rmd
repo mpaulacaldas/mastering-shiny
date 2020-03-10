@@ -90,6 +90,10 @@ There are two big ideas here:
   
 * Using `!!!` to __splat__ the elements of the list into individual arguments
   to `fluidRow()`. `fluidRow(!!!list(a, b))` is equivalent to `fluidRow(a, b)`.
+  
+<div class="answer">
+`r emo::ji("exploding_head")` Splatting!
+</div>
 
 I'm not going to teach functional programming in this book, but I will show a few aspirational examples. It's a good example of where improving your general R programming skills pays off in your Shiny apps. 
 
@@ -255,6 +259,44 @@ filter(ngo, !!!select)
 ```
 
 Don't worry if this all looks like gibberish: you can just use copy and paste instead. 
+
+<div class="answer">
+
+If I remeber correctly, here is how I have tackled the same problem before:
+
+```{r, message=FALSE}
+library(purrr)
+library(dplyr)
+
+input <- list(
+  "clarity" = c("VS1", "VS2"),
+  "color" = "E",
+  "cut" = c("Good", "Very Good")
+)
+
+names(input) %>% 
+  map(~ filter_at(ggplot2::diamonds, .x, all_vars(. == input[[.x]]))) %>% 
+  reduce(intersect)
+```
+
+I could have also used `.data` and `filter()` instead of `filter_at()`:
+
+```{r}
+names(input) %>% 
+  map(~ filter(ggplot2::diamonds, .data[[.x]] == input[[.x]])) %>% 
+  reduce(intersect)
+```
+
+The only advantage to my approach is that it may be conceptually easier to understand since it relies exclusively on functions from purrr and dplyr. The downside is that it can be computationally expensive since I create a lot of unnecessary intermediary objects. Overall, Hadley's suggestion is better.
+
+```{r}
+conds <-  map(names(input), function(v) expr(.data[[!!v]] == input[[!!v]]))
+conds
+
+filter(ggplot2::diamonds, !!!conds)
+```
+
+</div>
 
 ## Limitation of functions
 
