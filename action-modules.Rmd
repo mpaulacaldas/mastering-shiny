@@ -117,6 +117,10 @@ Here I've returned the UI components in a list, but you could also return them i
 
 (If you're using dynamic UI, you need one extra little trick - you can get the current namespace through `session$ns`; and you don't need to explicitly pass the `id`.)
 
+<div class="answer">
+`r emo::ji("confused")` Unclear.
+</div>
+
 ### Module server
 
 Next we tackle the server function. This gets wrapped inside _another_ function which must have an `id` argument. This function calls `moduleServer()` with the `id`, and a function that looks like a regular server function:
@@ -131,6 +135,21 @@ histogramServer <- function(id) {
   })
 }
 ```
+
+<div class="answer">
+If we use `callModule()` we need to name the arguments.
+```{r, eval = FALSE}
+histogramServer <- function(id) {
+  callModule(id = id, module = function(input, output, server) {
+    data <- reactive(mtcars[[input$var]])
+    output$hist <- renderPlot({
+      hist(data(), breaks = input$bins, main = input$var)
+    })
+  })
+}
+```
+</div>
+
 
 ### Updated app
 
@@ -224,6 +243,89 @@ stopifnot(!is.reactive(arg2))
 
 Note that you should never pass an input directly to an module server. If for example, you pass `input$foo`, it will pass the value of `input$foo` when the app starts, i.e. the initial `value` you set in the control. Instead, you'll need to wrap it in `reactive()` so that it continues to update.
 
+<div class="answer">
+To explore this statement, let's create a module based on the histogram example, but leaving out `input$bins` from the module logic.
+
+```{r}
+newHistogramUI <- function(id) {
+  list(
+    selectInput(NS(id, "var"), "Variable", names(mtcars)),
+    plotOutput(NS(id, "hist"))
+  )
+}
+newHistogramServer <- function(id, bins) {
+  moduleServer(id, function(input, output, session) {
+    data <- reactive(mtcars[[input$var]])
+    output$hist <- renderPlot({
+      hist(data(), breaks = bins, main = input$var)
+    })
+  })
+}
+```
+
+First, let's test out the module, setting `bins = 10` as the default.
+
+```{r}
+newHistogramModule <- function() {
+  shinyApp(
+    ui = fluidPage(newHistogramUI("hist1")),
+    server = function(input, output, session) {
+      newHistogramServer("hist1", bins = 10)
+    }
+  )
+}
+# newHistogramModule()
+```
+
+Let's use this module in an app with `input$bins`, and try to pass this value to the module.
+
+```{r}
+ui <- fluidPage(
+  numericInput("bins", "bins", 10, min = 1),
+  newHistogramUI("hist1"),
+  textOutput("out")
+)
+server <- function(input, output, session) {
+  newHistogramServer("hist1", bins = input$bins)
+  output$out <- renderText(paste0("Bins: ", input$bins))
+}
+```
+
+The app works, but the plots displays only the initial argument of `input$bins`.
+
+```{r, echo = FALSE, eval = FALSE}
+shinyApp(ui, server)
+```
+
+To ensure that the plot takes a reactive dependency on `input$bins`, I have to do two things:
+ 
+1. Wrap `input$bins` with a `reactive()` call in the server.
+1. Prepare `newHistogramServer()` to accept a reactive input as an argument. I do this by adding a `stopifnot()` condition, and changing `breaks = bins` to `breaks = bins()`.
+
+```{r}
+newHistogramServer <- function(id, bins) {
+  stopifnot(is.reactive(bins))
+  moduleServer(id, function(input, output, session) {
+    data <- reactive(mtcars[[input$var]])
+    output$hist <- renderPlot({
+      hist(data(), breaks = bins(), main = input$var)
+    })
+  })
+}
+
+ui <- fluidPage(
+  numericInput("bins", "bins", 10, min = 1),
+  newHistogramUI("hist1"),
+  textOutput("out")
+)
+server <- function(input, output, session) {
+  newHistogramServer("hist1", bins = reactive(input$bins))
+  output$out <- renderText(paste0("Bins: ", input$bins))
+}
+# shinyApp(ui, server)
+```
+</div>
+
 ### Case study: select data frames
 
 We'll start by create a module to make it easy to select from built-in data frames. Argument to module UI makes it possible to select built in datasets that are (e.g.) either data frames (`filter = is.data.frame`) or matrices (`filter = is.matrix`).
@@ -239,6 +341,13 @@ datasetInput <- function(id, filter = NULL) {
   selectInput(NS(id, "dataset"), "Pick a dataset", names)
 }
 ```
+
+<div class="answer">
+Alternative with `mget()`:
+```{r, eval = FALSE}
+data <- mget(names, as.environment("package:datasets"))
+```
+</div>
 
 Module server is similarly simple. There's only one new idea here, like a function, a module can return a value (almost always a reactive):
 
@@ -315,6 +424,28 @@ selectNumericVarModule <- function() {
 }
 # selectNumericVarModule()
 ```
+
+<div class="answer">
+`r emo::ji("warning")` We can't call use the regular notation for reactives (e.g. `data()`) inside another function call.
+
+```{r, eval = FALSE}
+# good
+var <- selectNumericVarServer("var", data)
+# bad
+var <- selectNumericVarServer("var", data())
+```
+
+If we do, we will get the following error when we try to run `selectNumericVarModule()`:
+
+<!-- Copy-pasting the error I got because I have no idea how to include the app, keep the error, but omit the screenshot of the failed app generated by webshot. -->
+
+```{r, echo = FALSE}
+reactive_warning <- "Warning: Error in .getReactiveEnvironment()$currentContext: Operation not allowed without an active reactive context. (You tried to do something that can only be done from inside a reactive expression or observer.)"
+
+cat(stringr::str_wrap(reactive_warning, 70))
+```
+
+</div>
 
 ### Case study: histogram
 
@@ -590,6 +721,8 @@ Convert to a module and generalise a little.
 
 `r emo::ji("bug")` In the app with the module, it is imposible to change to another option after writing something out in the `textInput()`. This was not an issue in the previous app. Keep an eye out for <https://github.com/hadley/mastering-shiny/pull/138>.
 
+`r emo::ji("bug")` The `moduleServer()` function in `radioButtonsExtraServer()` has `server` instead of `session`.
+
 </div>
 
 ```{r}
@@ -823,30 +956,39 @@ If you find your fingers itching to make a single module object that incorporate
    created.
    
    <div class="answer">
-   I can't figure out how to do it with a module. Here is an approach that works, with the disadvantage that it is not associated with the UI code.
-   
+   Here is my interpretation.
     ```{r}
-    server <- function(input, output, session) {
-    
-      createGgplotVore <- function(myvore, input_x = input$x, input_y = input$y) {
-        
-        output_name <- paste0("plot_", myvore)
-        
-        output[[output_name]] <- renderPlot({
-          vore_df <- filter(msleep, vore == myvore)
-          ggplot(data = vore_df, aes_string(x = input_x, y = input_y)) +
+    voreOutput <- function(id) {
+      plotOutput(NS(id, "plot"))
+    }
+    voreServer <- function(id, x, y) {
+      stopifnot(is.reactive(x), is.reactive(y))
+      moduleServer(id, function(input, output, session) {
+        vore <- reactive( filter(msleep, vore == id ))
+        output$plot <- renderPlot({
+          ggplot(data = vore(), aes_string(x = x(), y = y())) +
             geom_point()
         })
-        
-      }
-      
-      createGgplotVore("carni")
-      createGgplotVore("omni")
-      createGgplotVore("herbi")
+      })
+    }
     
+    ui <- fluidPage(
+      selectInputXY(inputId = "x", selected = "sleep_rem"),
+      selectInputXY(inputId = "y", selected = "sleep_total"),
+      tabsetPanel(
+        id = "vore",
+        tabPanel("Carnivore", voreOutput("carni")),
+        tabPanel("Omnivore", voreOutput("omni")),
+        tabPanel("Herbivore", voreOutput("herbi")))
+      )
+    server <- function(input, output, session) {
+      voreServer("carni", reactive(input$x), reactive(input$y))
+      voreServer("omni", reactive(input$x), reactive(input$y))
+      voreServer("herbi", reactive(input$x), reactive(input$y))
     }
     ```
-   
+    
+    `r emo::ji("warning")` From what I gather, we always have to use `reactive()` inside the `voreServer()` function call to call external inputs. If we leave the input as is (e.g. `voreServer(id, input$x...)`), the plot won't update when `input$x` changes. If we try to "create" the reactive in the function body of `voreServer()` (e.g. putting `x <- reactive(x)` on top), we will get an error.
    </div>
    
 3. Suppose you have an app that is slow to launch when a user visits it. Can  
