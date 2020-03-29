@@ -142,7 +142,7 @@ ui_screenshot <- function(ui, name, width = 600, height = NA) {
 app_screenshot <- function(app, name, width = 600, height = NA) {
   path <- file.path("screenshots", paste0(name, ".png"))
 
-  if (!isTRUE(getOption("knitr.in.progress")) || !file.exists(path)) {
+  if (!file.exists(path)) {
     if (!is.null(width)) {
       if (is.na(height)) {
         height <- app_height(app)
