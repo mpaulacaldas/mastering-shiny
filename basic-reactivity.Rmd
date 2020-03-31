@@ -339,7 +339,7 @@ This concept is very important and different to most other R code, so I'll say i
 
 ## Reactive expressions
 
-We've quickly skimmed over reactive expressions a couple of times, so you're hopefully getting a sense for what they might do. Now we'll to dive into more of the details, and show why they are so important when constructing real apps. 
+We've quickly skimmed over reactive expressions a couple of times, so you're hopefully getting a sense for what they might do. Now we'll dive into more of the details, and show why they are so important when constructing real apps. 
 
 Reactive expressions are important for two reasons:
 
@@ -465,7 +465,7 @@ invisible(app$waitFor("hist"))
 app_screenshot(app, "basic-reactivity/case-study-1", width = 800, height = 300)
 ```
 
-This defintion of `server` and `ui` yields Figure \@ref(fig:ttest). You can find a live version at <https://hadley.shinyapps.io/basic-reactivity-cs/>; I recommend opening the app and having a quick play to make sure you understand its basic operation before you continue reading. 
+This definition of `server` and `ui` yields Figure \@ref(fig:ttest). You can find a live version at <https://hadley.shinyapps.io/basic-reactivity-cs/>; I recommend opening the app and having a quick play to make sure you understand its basic operation before you continue reading. 
 
 ```{r, eval = FALSE, echo = FALSE}
 deployApp(ui, server, name = "basic-reactivity-cs", deps = "ggplot2")
@@ -527,7 +527,7 @@ This transformation yields the substantially simpler graph shown in Figure  \@re
 knitr::include_graphics("diagrams/basic-reactivity/case-study-2.png", dpi = 300 / 0.75)
 ```
 
-To emphasise this modularity the Figure \@ref(fig:ttest-module) draws boxes around the independent components. We'll come back to this idea in Chapter \ref(action-modules), when we discuss modules. Modules allow you to extract out repeated code for reuse, while guaranteeing that it's isolated from everything else in the app. Modules are an extremely useful and powerful technique for more complex apps.
+To emphasise this modularity the Figure \@ref(fig:ttest-module) draws boxes around the independent components. We'll come back to this idea in Chapter \ref(scaling-modules), when we discuss modules. Modules allow you to extract out repeated code for reuse, while guaranteeing that it's isolated from everything else in the app. Modules are an extremely useful and powerful technique for more complex apps.
 
 ```{r ttest-module, echo = FALSE, out.width = NULL, fig.cap="Modules enforce isolation between parts of an app"}
 knitr::include_graphics("diagrams/basic-reactivity/case-study-3.png", dpi = 300 / 0.75)

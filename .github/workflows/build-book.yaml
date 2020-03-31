@@ -4,6 +4,8 @@ on:
 
 name: build-book
 
+name: build-book
+
 jobs:
   build:
     runs-on: macOS-latest
