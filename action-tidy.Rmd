@@ -375,7 +375,7 @@ server <- function(input, output, session) {
 ```
 
 <div class="answer">
-Why not `group_by_at(input$vars)`?
+This is equivalent to the soon to be superseded `group_by_at(input$vars)`.
 </div>
 
 The second argument is a function (or list of functions) that's applied to each selected column. That makes it a good fit for `mutate()` and `summarise()` where you typically want to transform each variable in some way. For example, the following code lets the user select any number of grouping variables, and any number of variables to summarise with their means.
@@ -397,7 +397,7 @@ server <- function(input, output, session) {
 ```
 
 <div class="answer">
-Again, why not:
+Again, previously:
 ```{r, eval = FALSE}
 mtcars %>% 
   group_by_at(input$vars_g) %>% 
@@ -425,10 +425,6 @@ server <- function(input, output, session) {
   })
 }
 ```
-
-<div class="answer">
-Are they deprecating scoped dplyr verbs??? They were so useful.
-</div>
 
 ## `parse()` + `eval()`
 
