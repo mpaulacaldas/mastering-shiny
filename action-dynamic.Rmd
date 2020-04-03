@@ -643,7 +643,7 @@ The simplest way to create UI with code is to add a dialog box. A dialog box is 
 
 `modalDialog()` works much like `fluidPage()`: 
 
-## Creating UI with code
+## Creating UI with code {#programming-ui}
 
 Sometimes none of the techniques described above gives you the level of dynamism that you need. There's one last technique that gives you the ability to create any controls (both inputs and outputs) with code in the server function. You've always created your UI with code; this technique gives you the ability to re-generate while the app is running, not just define it when the app starts.
 
@@ -656,7 +656,7 @@ This technique has two components:
 * You use `renderUI()` to fill in the placeholder with UI generated in the 
   server function.
 
-Here's a simple example to illustrate the basic idea. It dynamically creates a different type of input control depending on an input. The resulting app is shown in Figure \@ref(render-simple).
+Here's a simple example to illustrate the basic idea. It dynamically creates a different type of input control depending on an input. The resulting app is shown in Figure \@ref(fig:render-simple).
 
 ```{r}
 ui <- fluidPage(
@@ -994,7 +994,7 @@ demo$resize(800)
 demo$screenshot()
 ```
 
-From there, it's a simple generalisation to work with any data frame. Here I'll illustrate it using the data frames in the datasets package, but you can easily imagine how you might extend this to user uploaded data. See the result in Figure \@ref(filtering-final).
+From there, it's a simple generalisation to work with any data frame. Here I'll illustrate it using the data frames in the datasets package, but you can easily imagine how you might extend this to user uploaded data. See the result in Figure \@ref(fig:filtering-final).
 
 ```{r}
 dfs <- keep(ls("package:datasets"), ~ is.data.frame(get(.x, "package:datasets")))
