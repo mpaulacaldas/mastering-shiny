@@ -670,10 +670,8 @@ The following sections show more advanced modules motivated by real problems.
 ### Limited selection + other
 
 <div class="answer">
-Cool way to mix `radioButtons()` with `selectInput()`.
-</div>
+`r emo::ji("gem")` Cool way to mix `radioButtons()` with `selectInput()`.
 
-<div class="answer">
 `r emo::ji("exploding_head")` `unname()`. So useful.
 
 `r emo::ji("warning")` We need to wrap `textInput()` with `list()`. Otherwise, we get the following error:
