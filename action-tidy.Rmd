@@ -397,11 +397,13 @@ server <- function(input, output, session) {
 ```
 
 <div class="answer">
-Again, previously:
+This is a perfect example of something that was hard to do with the previous scoped dplyr verbs:
 ```{r, eval = FALSE}
 mtcars %>% 
   group_by_at(input$vars_g) %>% 
-  summarise_all(input$vars_s, list(mean = mean, n = n))
+  transmute_at(input$vars_s, mean) %>% 
+  mutate(n = n()) %>% 
+  filter(row_number() == 1)
 ```
 </div>
 
