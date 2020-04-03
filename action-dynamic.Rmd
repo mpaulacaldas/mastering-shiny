@@ -319,6 +319,8 @@ There's no way around this problem because you have one idea (the temperature) w
       })
     }
     ```
+    
+    `r emo::ji("bug")` The code above doesn't actually work. This seems to be a bug from Shiny: <https://github.com/rstudio/shiny/issues/2798>
     </div>
     
 1.  Complete the user interface below with a server function that updates
