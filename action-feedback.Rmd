@@ -197,9 +197,9 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 Both `exists()` and `cancelOutput = TRUE` are `r emo::ji("ok_hand")`
-</div>
+:::
 
 ### Validate output
 
@@ -229,7 +229,7 @@ server <- function(input, output, server) {
 }
 ```
 
-<div class="answer">
+::: answer
 A pattern that I have seen more often is `validate(need(...))`. Note that with this syntax we have to negate the logical condition defined before.
 ```{r, eval = FALSE}
 server <- function(input, output, server) {
@@ -247,7 +247,7 @@ server <- function(input, output, server) {
   })
 }
 ```
-</div>
+:::
 
 ## Notifications
 
@@ -331,11 +331,11 @@ server <- function(input, output, session) {
 
 Generally, these sort of notifications will live in a reactive, because that ensures that the long-running task is only re-run when absolutely needed.
 
-<div class="answer">
+::: answer
 This is a useful and efficient pattern. Previously, I would have probably used an `observeEvent()` to remove the notification once the import of the file was successful. This approach is better, although I am not 100% clear on why we have to set `add = TRUE`. 
 
 Also, what are the other Shiny functions that return the object's ID? This seems like a useful pattern, but I don't see it documented elsewhere (like `showModal()`, for example).
-</div>
+:::
 
 ### Progressive updates
 
@@ -560,9 +560,9 @@ There are a few small, but important, details to consider when creating a dialog
 * Can you make the dangerous option more obvious? Here I've used 
   `class = "btn btn-danger"` to style the button prominently.
   
-  <div class="answer">
+  ::: answer
   `r emo::ji("gem")` More CSS options for buttons at <https://www.w3schools.com/bootstrap/bootstrap_ref_css_buttons.asp>.
-  </div>
+  :::
   
 Jakob Nielsen has more good advice at <http://www.useit.com/alertbox/ok-cancel.html>.
 
@@ -665,7 +665,7 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 Here are some comments explaining what I *think* is going on.
 ```{r}
 runLater <- function(action, seconds = 3) {
@@ -722,7 +722,7 @@ server <- function(input, output, session) {
   })
 }
 ```
-</div>
+:::
 
 ### Trash
 

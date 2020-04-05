@@ -220,13 +220,13 @@ ui_screenshot(ui, "basic-ui/action")
     ui_screenshot(ui, "basic-ui/placeholder")
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r, eval = FALSE}
     ui <- fluidPage(
       textInput("your_name", NULL, placeholder = "Your name")
     )
     ```
-    </div>
+    :::
 
 1.  Carefully read the documentation for `sliderInput()` to figure out how to 
     create a date slider, as shown below.
@@ -239,7 +239,7 @@ ui_screenshot(ui, "basic-ui/action")
     ui_screenshot(ui, "basic-ui/date-slider")
     ```
     
-    <div class="answer">
+    ::: answer
     
     We can provide dates to the `min`, `max` and `value` arguments of `fluidPage()`, and tweak the formatting with `timeFormat`.
     
@@ -270,13 +270,13 @@ ui_screenshot(ui, "basic-ui/action")
     )
     ```
     
-    </div>
+    :::
 
 1.  If you have a moderately long list, it's useful to create sub-headings that
     break the list up into pieces. Read the documentation for `selectInput()` 
     to figure out how. (Hint: the underlying HTML is called `<optgroup>`.)
     
-    <div class="answer">
+    ::: answer
     The solution is to create a named list. Using the example from the `?selectInput()`:
     ```{r}
     ui <- fluidPage(
@@ -292,14 +292,14 @@ ui_screenshot(ui, "basic-ui/action")
     )
     ```
     
-    </div>
+    :::
 
 1.  Create a slider input to select values between 0 and 100 where the interval 
     between each selectable value on the slider is 5. Then, add animation to the 
     input widget so when the user presses play the input widget scrolls through 
     automatically.
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       sliderInput(
@@ -313,7 +313,7 @@ ui_screenshot(ui, "basic-ui/action")
         )
       )
     ```
-    </div>
+    :::
 
 1.  Using the following numeric input box the user can enter any value between 
     0 and 1000. What is the purpose of the step argument in this widget?
@@ -322,9 +322,9 @@ ui_screenshot(ui, "basic-ui/action")
     numericInput("number", "Select a value", value = 150, min = 0, max = 1000, step = 50)
     ```
     
-    <div class="answer">
+    ::: answer
     The `step` argument controls the interval that is suggested when the user clicks on the arrows on the right side of the box. The user is however free to override the suggested values by typing a number directly into the box.
-    </div>
+    :::
 
 ## Outputs {#outputs}
 
@@ -435,7 +435,7 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
 1.  Re-create the Shiny app from the plots section, this time setting height to 
     300px and width to 700px.
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       plotOutput("plot", width = "700px", height = "300px")
@@ -445,12 +445,12 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
     }
     ```
     
-    </div>
+    :::
 
 1.  Add an additional plot to the right of the existing plot, and size it so
     that each plot takes up half the width of the app.
     
-    <div class="answer">
+    ::: answer
     `r emo::ji("confused")`
     
     I gave up on this one. I have no idea how to make the plots go side-by-side without resorting to `fluidRow(column())`. I see that `plotOutput()` has an `inline` argument, but it returns `Error in pngfun: invalid quartz() device size`
@@ -480,7 +480,7 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
       output$plot2 <- renderPlot(plot(5:1), height = 300, width = 350)
     }
     ```
-    </div>
+    :::
 
 1.  Update the options for `renderDataTable()` below so that the table is 
     displayed, but nothing else, i.e. remove the search, ordering, and filtering
@@ -496,7 +496,7 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
     }
     ```
     
-    <div class="answer">
+    ::: answer
     The code above produces the following table:
     
     ```{r, echo = FALSE, out.width = NULL}
@@ -527,7 +527,7 @@ You can let the user download a file with `downloadButton()` or `downloadLink()`
       "basic-ui/sol-output-plot-datatable-no-search-order"
       )
     ```
-    </div>
+    :::
 
 ## Layouts {#layout}
 
@@ -709,7 +709,7 @@ As you can see, theming your app is quite straightforward: you just need to use 
 1.  Modify the Central Limit Theorem app so that the sidebar is on the right 
     instead of the left.
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       headerPanel("Central limit theorem"),
@@ -730,12 +730,12 @@ As you can see, theming your app is quite straightforward: you just need to use 
     Sys.sleep(0.5)
     app_screenshot(app, "basic-ui/sol-sidebar-right", width = 800)
     ```
-    </div>
+    :::
     
 1.  Browse the themes available in the shinythemes package, pick an attractive 
     theme, and apply it the Central Limit Theorem app.
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       headerPanel("Central limit theorem"),
@@ -757,7 +757,7 @@ As you can see, theming your app is quite straightforward: you just need to use 
     Sys.sleep(0.5)
     app_screenshot(app, "basic-ui/sol-theme-sandstone", width = 800)
     ```
-    </div>
+    :::
 
 <!--
 

@@ -40,9 +40,9 @@ shinyApp(ui, server)
 **RStudio Tip**: You can easily create a new directory and an `app.R` file containing a basic shiny app in one step by clicking **File | New Project**, then selecting "New Directory" and "Shiny Web Application". Or, if you've already created the `app.R` file, you can quickly add the app boilerplate by typing "shinyapp" and pressing Shift+Tab.
 :::
 
-<div class="answer">
+::: answer
 **TODO** Check why the snippet is not available in my RStudio. I am using  1.2.5033.
-</div>
+:::
 
 This is a complete, if trivial, Shiny app! Looking closely at the code above, our `app.R` does four things:
 
@@ -116,9 +116,9 @@ ui <- fluidPage(
 )
 ```
 
-<div class="answer">
+::: answer
 This is a very useful functionality of `ls()`. `ls("package:datasets")` returns all of the exported objects (in this case, all data sets) from the datasets package. Note that for the function to work, the package needs to be part of the search list (i.e. it has to be loaded). There is no need to explicitly load datasets because it is part of base R.
-</div>
+:::
 
 
 This example uses four new functions:
@@ -166,9 +166,9 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 The first argument to `get()` is a character string with the name of the object, and the second is the environment where to look for the object.
-</div>
+:::
 
 Almost every output you'll write in Shiny will follow this same pattern:
 
@@ -254,7 +254,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     })
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r, eval = FALSE}
     library(shiny)
     
@@ -271,7 +271,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     
     shinyApp(ui, server)
     ```
-    </div>
+    :::
 
 1.  Suppose your friend wants to design an app that allows the user to set a 
     number (`x`) between 1 and 50, and displays the result of multiplying this 
@@ -300,7 +300,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
    
     Can you help them find and correct the error?
     
-    <div class="answer">
+    ::: answer
     ```{r}
     server <- function(input, output, session) {
       output$product <- renderText({ 
@@ -313,7 +313,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     app <- testApp(ui, server)
     app_screenshot(app, "basic-app/sol-x-times-5")
     ```
-    </div>
+    :::
 
 1.  Extend the app from the previous exercise to allow the user to set the 
     value of the multiplier, `y`, so that the app yields the value of `x * y`. 
@@ -336,7 +336,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     app_screenshot(app, "basic-app/ex-x-times-y")
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       sliderInput("x", label = "If x is", min = 1, max = 50, value = 30),
@@ -357,7 +357,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     app_screenshot(app, "basic-app/sol-x-times-y")
     ```
     
-    </div>
+    :::
 
 1.  Replace the UI and server components of your app from the previous exercise 
     with the UI and server components below, run the app, and describe the app's 
@@ -389,7 +389,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     }
     ```
     
-    <div class="answer">
+    ::: answer
     The app takes two inputs, `x` and `y`, and returns the results of three different operations: `x * y`, `(x * y) + 5` and `(x * y) + 10`. Note that the second and third operations can be calculated from the first. We can get rid of this duplication with a reactive.
     ```{r}
     ui <- fluidPage(
@@ -420,7 +420,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     app <- testApp(ui, server)
     app_screenshot(app, "basic-app/sol-x-times-y-plus")
     ```
-    </div>
+    :::
 
 1.  The following app is very similar to one you've seen earlier in the chapter: 
     you select a dataset from a package (this time we're using the **ggplot2** 
@@ -452,7 +452,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     }
     ```
     
-    <div class="answer">
+    ::: answer
     The bugs were:
     
     - Regular typo: `output$summmry` should be `output$summary`
@@ -487,4 +487,4 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     }
     ```
     
-    </div>
+    :::

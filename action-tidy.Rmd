@@ -294,9 +294,9 @@ This problem is due to the ambiguity of data-variables and env-variables, and be
 df %>% filter(.data[[input$var]] > .env$input$min)
 ```
 
-<div class="answer">
+::: answer
 `r emo::ji("gem")` This `.env` solves a problem that I have all the time.
-</div>
+:::
 
 [^inception]: You might wonder if the same problem applies to variables called `.data` and `.env`. In the unlikely event of having columns with those names you'll need to refer to them with explicitly `.data$.data` and `.data$.env`.
 
@@ -329,9 +329,9 @@ Tidy-selection provides a concise way of selecting columns by position, name, or
 
 To refer to variables indirectly use `any_of()` or `all_of()`[^one-of]: both expect an character vector env-variable containing data-variable names. The only difference is what happens if you supply a variable named that doesn't exist in the input: `all_of()` will throw an error, while `any_of()` will silently ignore it.
 
-<div class="answer">
+::: answer
 This is a clear improvement over `one_of()`, which returned a warning if the columns did not exist in the data frame.
-</div>
+:::
 
 [^one-of]: In older versions of tidyselect and dplyr, you'll need to use `one_of()`. It has the same semantics as `any_of()`, but a less informative name.
 
@@ -374,9 +374,9 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 This is equivalent to the soon to be superseded `group_by_at(input$vars)`.
-</div>
+:::
 
 The second argument is a function (or list of functions) that's applied to each selected column. That makes it a good fit for `mutate()` and `summarise()` where you typically want to transform each variable in some way. For example, the following code lets the user select any number of grouping variables, and any number of variables to summarise with their means.
 
@@ -396,7 +396,7 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 This is a perfect example of something that was hard to do with the previous scoped dplyr verbs:
 ```{r, eval = FALSE}
 mtcars %>% 
@@ -405,7 +405,7 @@ mtcars %>%
   mutate(n = n()) %>% 
   filter(row_number() == 1)
 ```
-</div>
+:::
 
 If you need your code to work with older version of dplyr, you'll need a slightly different approach. In older versions of dplyr, every data-masking function is paired with a tidy-selection variant that has the suffix `_at`. That approach yields the following code for the two server functions above:
 

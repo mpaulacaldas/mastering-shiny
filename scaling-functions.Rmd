@@ -136,9 +136,9 @@ Don't worry if this code looks like gibberish to you: you can continue to use co
 
 See Section \@ref(programming-ui) for more examples of using these techniques to generate dynamic UI in response to user actions.
 
-<div class="answer">
+::: answer
 This is such an useful pattern. I have used it before in situations where `vars` is a reactive and the UI needs to be created dynamically on the server side.
-</div>
+:::
 
 ### Other applications
 
@@ -229,9 +229,9 @@ load_file <- function(name, path) {
 
 (Should it take `name` and `path` arguments or a single list?)
 
-<div class="answer">
+::: answer
 In terms of debugging, it will be easier if the `name` and `path` arguments are provided separately.
-</div>
+:::
 
 When extracting out such helpers, where possible avoiding taking reactives as input or returning outputs. Instead, pass them in through the arguments, and assume the caller will turn into a reactive. This isn't a hard and fast rule; sometime it will make sense for your functions to input or output reactives. But generally, I think it's better to keep the reactive and non-reactive parts of your app as separate a possible. In this case, I'm still using `validate()`; that works because outside of Shiny `validate()` works similar to `stop()`. But I keep the `req()` in the server, because it shouldn't the be responsibility of the file parsing code to know when it's run.
 

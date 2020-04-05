@@ -253,7 +253,7 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
 
 1.  Draw the reactive graph for each app.
 
-    <div class="answer">
+    ::: answer
     `neiss/prototype.R` and `neiss/polish-tables.R` share the same reactive graph.
     ```
     input$code+---->selected()+--->output$diag
@@ -306,12 +306,12 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
             |
     input$y-+
     ```
-    </div>
+    :::
 
 1.  What happens if you flip `fct_infreq()` and `fct_lump()` in the code that 
     reduces the summary tables?
     
-    <div class="answer">
+    ::: answer
     As a reminder, this is what `fct_lump(fct_infreq(...), n = 5)` returns on the `injuries` table.
     ```{r, ref.label="lump-infreq"}
     ```
@@ -325,12 +325,12 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
     ```
     
     The reason why `Other` jumps to the front of the list is because we ordered our factors with respect to their frequency *after* we had already reduced the number of factors. Therefore, the factor level `Other`, which is an aggregation of smaller groups, immediately jumped to the top of the list because it is the factor with the most observations.
-    </div>    
+    :::    
 
 1.  Add an input control that lets the user decide how many rows to show in the
     summary tables.
     
-    <div class="answer">
+    ::: answer
     
     First, I added a `numericInput()` to the UI.
     ```{r, code = section_get("neiss/sol-summary-rows.R", "first-row"), eval = FALSE}
@@ -346,7 +346,7 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
     ```{r, code = section_get("neiss/sol-summary-rows.R", "tables"), eval = FALSE}
     ```
     
-    </div>
+    :::
 
 1.  Provide a way to step through every narrative systematically with forward
     and backward buttons. 
@@ -354,7 +354,7 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
     Advanced: Make the list of narratives "circular" so that advancing 
     forward from the last narrative takes you to the first.
     
-    <div class="answer">
+    ::: answer
     First, I added two buttons to the UI.
     ```{r, code = section_get("neiss/sol-loop-narrative.R", "narrative-ui"), eval = FALSE}
     ```
@@ -367,5 +367,5 @@ knitr::include_graphics("screenshots/basic-case-study/narrative.png", dpi = scre
     
     ```{r, code = section_get("neiss/sol-loop-narrative.R", "narrative-server"), eval = FALSE}
     ```
-    </div>
+    :::
 

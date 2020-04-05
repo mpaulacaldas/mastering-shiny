@@ -105,9 +105,9 @@ server <- function(input, output, session) {
 }
 ```
 
-<div class="answer">
+::: answer
 `r emo::ji("point_up")` **Nice trick:** Pass `validate()` as the last argument to `switch()`.
-</div>
+:::
 
 Note that since `multiple = FALSE` (the default), `input$file` will be a single row data frame, and `input$file$name` and `input$file$datapath` will be a length-1 character vectors. 
 
@@ -245,10 +245,10 @@ There are a few other tricks worth knowing about:
     copying the report to a temporary directory when your app starts (i.e. 
     outside of `server()`):
     
-    <div class="answer">
+    ::: answer
     `r emo::ji("question")` I am confused. The code chunk says something 
     different than the words. **TODO**: Try it out with an example.
-    </div>
+    :::
 
     ```{r}
     report_path <- tempfile(fileext = ".Rmd")
@@ -263,9 +263,9 @@ There are a few other tricks worth knowing about:
     packages, options, etc). For greater robustness, I recommend running 
     `render()` in a separate R session using the callr package:
     
-    <div class="answer">
+    ::: answer
     `r emo::ji("question")` According to [the article on generating dowloadable reports](https://shiny.rstudio.com/articles/generating-reports.html), we specify `envir = new.envir(parent = globalenv())` to isolate the code in the document from the code in the app. Why isn't this enough? Why do we need the extra call to `callr`? Is it because of the loaded packages and options?
-    </div>
+    :::
     
     ```{r, eval = FALSE}
     render_report <- function(input, output, params) {

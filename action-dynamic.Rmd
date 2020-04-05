@@ -155,9 +155,9 @@ ui <- fluidPage(
 )
 ```
 
-<div class="answer">
+::: answer
 This strategy is smart (i.e. setting `choices = NULL` to then dynamically update the options). Previously, I would have created the select inputs on the server side and updated the choices there. I think Hadley's approach makes the UI a litte more cluttered (the boxes are there even if you can't use them), but it communicates the range of options better to the user. I also like the fact that it leaves most of the UI code in the ui script.
-</div>
+:::
 
 In the server function, I work top-down:
 
@@ -220,7 +220,7 @@ demo$deploy()
 
 Try out this simple example at `r demo$link()`, or see a more fully fleshed out application at <https://github.com/hadley/mastering-shiny/tree/master/sales-dashboard>.
 
-<div class="answer">
+::: answer
 The fully fleshed out application can be run from the present repo using:
 
 ```{r, eval = FALSE}
@@ -228,7 +228,7 @@ shiny::runApp("sales-dashboard/app.R")
 ```
 
 I particularly like the use of `selectInput(..., selectize = FALSE, size  = 5)`, which changes the appearance of the select input: it creates a larger box that displays 5 options at a time.
-</div>
+:::
 
 ### Circular references
 
@@ -308,7 +308,7 @@ There's no way around this problem because you have one idea (the temperature) w
     )
     ```
     
-    <div class="answer">
+    ::: answer
     I also update the default `value` to January 1st of the year defined `input$year`.
     ```{r}
     server <- function(input, output, session) {
@@ -321,7 +321,7 @@ There's no way around this problem because you have one idea (the temperature) w
     ```
     
     `r emo::ji("bug")` The code above doesn't actually work. This seems to be a bug from Shiny: <https://github.com/rstudio/shiny/issues/2798>
-    </div>
+    :::
     
 1.  Complete the user interface below with a server function that updates
     `input$county` choices based on `input$state`. For an added challenge,
@@ -338,7 +338,7 @@ There's no way around this problem because you have one idea (the temperature) w
     )
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r}
     server <- function(input, output, session) {
       observeEvent(input$state, {
@@ -356,7 +356,7 @@ There's no way around this problem because you have one idea (the temperature) w
       })
     }
     ```
-    </div>
+    :::
 
 1.  Complete the user interface below with a server function that updates
     `input$country` choices based on the `input$continent`. Use 
@@ -373,7 +373,7 @@ There's no way around this problem because you have one idea (the temperature) w
     )
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r}
     server <- function(input, output, session) {
       
@@ -395,13 +395,13 @@ There's no way around this problem because you have one idea (the temperature) w
       })
     }
     ```
-    </div>
+    :::
 
 1.  Extend the previous app so that you can also choose to select no continent,
     and hence see all countries. You'll need to add `""` to the list of
     choices, and then handle that specially when filtering.
     
-    <div class="answer">
+    ::: answer
     ```{r}
     ui <- fluidPage(
       selectInput("continent", "Continent", choices = c("", levels(continents))), 
@@ -434,12 +434,12 @@ There's no way around this problem because you have one idea (the temperature) w
     - We remove `req(input$continent)` because an empty string (`""`) is considereda "falsy" value by `req()`.
     - `continents` needs to be coerced into a character string before combining it with `""`. Otherwise, we get numeric values in the select input.
     
-    </div>
+    :::
 
 1.  What is at the heart of the problem described at 
     <https://community.rstudio.com/t/29307>?
     
-    <div class="answer">
+    ::: answer
     Here is the app provided in the question, slightly modified for readability:
     ```{r, eval = FALSE}
     library(shiny)
@@ -470,7 +470,7 @@ There's no way around this problem because you have one idea (the temperature) w
     ```
     
     The problem here is that we have inter-related inputs: setting `input$a == .333` (i.e. the value at start-up), triggers a change in `input$a`, `input$b` and `input$c` *at the same time*, which in itself triggers another chain of updates from the same inputs.
-    </div>
+    :::
 
 ## Dynamic visibility
 
@@ -773,7 +773,7 @@ knitr::include_graphics(c(s1, s2, s3))
 demo$deploy()
 ```
 
-<div class="answer">
+::: answer
 The app shown before returns the following warning upon start-up:
 
 ```r
@@ -798,7 +798,7 @@ server <- function(input, output, session) {
   })
 }
 ```
-</div>
+:::
 
 If you run this app, you'll discover a really annoying behaviour: whenever you change the number of colours, all the data you've entered disappears. We can fix this problem by using the same technique as before: setting `value` to the (isolated) current value. I'll also tweak the appearance to look a little nicer, including displaying the selected colours in a plot. Sample screenshots are shown in Figure \@ref(fig:render-palette-full).
 
@@ -852,7 +852,7 @@ knitr::include_graphics(c(s1, s2))
 demo$deploy()
 ```
 
-<div class="answer">
+::: answer
 Again, here is how I would tweak the code to prevent all warnings. Note that I removed the `%||‰ ""` condition inside `output$col` because I don't know why it's there and I see no problems when I remove it.
 ```{r}
 ui <- fluidPage(
@@ -891,7 +891,7 @@ server <- function(input, output, session) {
   })
 }
 ```
-</div>
+:::
 
 ### Dynamic filtering
 
@@ -1066,7 +1066,7 @@ demo$deploy()
     implement dynamic visiblity, how could you keep the values in sync when
     you change the controls?
     
-    <div class="answer">
+    ::: answer
     This was my first attempt. I wanted to see if I could create the two inputs in the UI side and give them the same name. It turns out that, in theory, I *can* (the app *looks* fine and I get no warnings), but the value of `input$n` is the one from the input first defined in the page (the slider, in this case).
     ```{r}
     ui <- fluidPage(
@@ -1125,11 +1125,11 @@ demo$deploy()
       })
     }
     ```
-    </div>
+    :::
 
 1.  Add support for date and date-time columns `make_ui()` and `filter_var()`.
 
-    <div class="answer">
+    ::: answer
     There is no straight-forward way to deal with the date-time columns, since [Shiny does not currently support date-time input](https://github.com/rstudio/shiny/issues/897). The [shinyTime](https://github.com/burgerga/shinyTime) package adds a time-input, but we can't use it to filter date-time columns without creating an additional date-input. For simplicity, I will treat date and date-time columns the same way in `make_ui()`.
     
     ```{r}
@@ -1213,15 +1213,15 @@ demo$deploy()
     }
     ```
     
-    </div>
+    :::
     
 1.  (Advanced) If you know the [S3 OOP](http://adv-r.hadley.nz/S3.html) system,
     consider how you could replace the `if` blocks in `make_ui()` and
     `filter_var()` with generic functions.
     
-    <div class="answer">
+    ::: answer
     **TODO**
-    </div>
+    :::
 
 1.  (Hard) Make a wizard that allows the user to upload their own dataset.  
     The first page should handle the upload. The second should handle reading
@@ -1229,6 +1229,6 @@ demo$deploy()
     the column type. The third page should provide some way to get a summary
     of the dataset.
     
-    <div class="answer">
+    ::: answer
     **TODO**
-    </div>
+    :::

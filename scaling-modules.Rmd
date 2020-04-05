@@ -117,7 +117,7 @@ histogramServer <- function(id) {
 
 Note that `moduleServer()` takes care of the namespacing for you: inside of `moduleServer(id)`, `input$var` and  `input$bins` refer to the inputs with names `NS(id, "var")` and `NS(id, "bins")`.
 
-<div class="answer">
+::: answer
 If we use `callModule()` we need to name the arguments.
 ```{r, eval = FALSE}
 histogramServer <- function(id) {
@@ -129,7 +129,7 @@ histogramServer <- function(id) {
   })
 }
 ```
-</div>
+:::
 
 ### Updated app
 
@@ -225,12 +225,12 @@ datasetInput <- function(id, filter = NULL) {
 }
 ```
 
-<div class="answer">
+::: answer
 Alternative with `mget()`:
 ```{r, eval = FALSE}
 data <- mget(names, as.environment("package:datasets"))
 ```
-</div>
+:::
 
 The module server is also simple: we just use `get()` to retrieve the dataset using its name. There's one new idea here. Like a function and unlike a regular server function, most module servers return a value. Here we take advantage of the usual rule that last expression processed in the function becomes the return value[^early-return]. This should always be a reactive.
 
@@ -329,7 +329,7 @@ selectVarApp <- function(filter = is.numeric) {
 # selectVarApp()
 ```
 
-<div class="answer">
+::: answer
 `r emo::ji("warning")` We can't call use the regular notation for reactives (e.g. `data()`) inside another function call.
 
 ```{r, eval = FALSE}
@@ -348,7 +348,7 @@ reactive_warning <- "Warning: Error in .getReactiveEnvironment()$currentContext:
 
 cat(stringr::str_wrap(reactive_warning, 70))
 ```
-</div>
+:::
 
 ### Server inputs
 
@@ -377,7 +377,7 @@ find_vars <- function(data, filter) {
 
 Checking that the module inputs are reactive (or not) also helps you avoid a common problem when you mix modules with other input controls. `input$var` is not a reactive, so whenever you pass an input value into a module, you'll need to wrap it in a `reactive()`. If you check the inputs like I recommend here you'll get a clear error; otherwise you'll get something cryptic like `could not find function "data"`.
 
-<div class="answer">
+::: answer
 To explore this statement, let's create a module based on the histogram example, but leaving out `input$bins` from the module logic.
 
 ```{r}
@@ -458,7 +458,7 @@ server <- function(input, output, session) {
 }
 # shinyApp(ui, server)
 ```
-</div>
+:::
 
 
 ### Modules inside of modules
@@ -669,7 +669,7 @@ The following sections show more advanced modules motivated by real problems.
 
 ### Limited selection + other
 
-<div class="answer">
+::: answer
 `r emo::ji("gem")` Cool way to mix `radioButtons()` with `selectInput()`.
 
 `r emo::ji("exploding_head")` `unname()`. So useful.
@@ -683,7 +683,7 @@ The following sections show more advanced modules motivated by real problems.
 
 `r emo::ji("bug")` In the app with the module, it is imposible to change to another option after writing something out in the `textInput()`. This was not an issue in the previous app. Keep an eye out for <https://github.com/hadley/mastering-shiny/pull/138>.
 
-</div>
+:::
 
 ```{r}
 radioButtonsExtraUI <- function(id, label, choices, selected = NULL, placeholder = NULL) {
@@ -877,7 +877,7 @@ In Shiny, UI and server are inherently disconnected; Shiny doesn't know which UI
     shinyApp(ui = ui, server = server)
     ```
     
-    <div class="answer">
+    ::: answer
     ```{r}
     selectInputXY <- function(inputId, selected, ...) {
       selectInput(
@@ -906,13 +906,13 @@ In Shiny, UI and server are inherently disconnected; Shiny doesn't know which UI
         tabPanel("Herbivore", plotOutput("plot_herbi")))
       )
     ```
-    </div>
+    :::
 
 2. Continue working with the same app from the previous exercise, and further 
    remove redundancy in the code by modularizing how subsets and plots are 
    created.
 
-   <div class="answer">
+   ::: answer
    Here is my interpretation.
     ```{r}
     voreOutput <- function(id) {
@@ -946,7 +946,7 @@ In Shiny, UI and server are inherently disconnected; Shiny doesn't know which UI
     ```
     
     `r emo::ji("warning")` From what I gather, we always have to use `reactive()` inside the `voreServer()` function call to call external inputs. If we leave the input as is (e.g. `voreServer(id, input$x...)`), the plot won't update when `input$x` changes. If we try to "create" the reactive in the function body of `voreServer()` (e.g. putting `x <- reactive(x)` on top), we will get an error.
-   </div>
+   :::
    
 3. Suppose you have an app that is slow to launch when a user visits it. Can  
    modularizing your app code help solve this problem? Explain your reasoning.
