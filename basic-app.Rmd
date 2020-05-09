@@ -251,7 +251,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
     tableOutput("mortgage")
     renderPlot("histogram", {
       hist(rnorm(1000))
-    })
+    }, res = 96)
     ```
     
     ::: answer
@@ -448,7 +448,7 @@ knitr::include_graphics("images/basic-app/cheatsheet.png", dpi = 300)
       })
       output$plot <- renderPlot({
         plot(dataset)
-      })
+      }, res = 96)
     }
     ```
     

@@ -24,9 +24,9 @@ library(shiny)
 
 ## Updating inputs
 
-We'll begin with a simple technique that allows you to modify an input after it has been created. Every input control, e.g. `textInput()`, is paired with an __update function__, e.g. `updateTextInput()`, that allows you to modify the control after it has been created. The update funtions look a little different to other Shiny functions: they all takes the current `session` as the first argument, and the name of the input (as a string) as the second. The remaining arguments match the arguments to the input constructor.
+We'll begin with a simple technique that allows you to modify an input after it has been created. Every input control, e.g. `textInput()`, is paired with an __update function__, e.g. `updateTextInput()`, that allows you to modify the control after it has been created. The update funtions look a little different to other Shiny functions: they all take the current `session` as the first argument, and the name of the input (as a string) as the second. The remaining arguments match the arguments to the input constructor.
 
-Take the example in the code below, with the results shown in Figure \@ref(fig:update-basics). The app has two inputs that control the range (the `min` and `max`) of another input, a slider. The key idea is to use `observeEvent()`[^observe] to trigger `updateNumericInput()` whenever the `min` or `max` inputs change. 
+Take the example in the code below, with the results shown in Figure \@ref(fig:update-basics). The app has two inputs that control the range (the `min` and `max`) of another input, a slider. The key idea is to use `observeEvent()`[^observe] to trigger `updateSliderInput()` whenever the `min` or `max` inputs change.
 
 ```{r}
 ui <- fluidPage(
@@ -36,10 +36,10 @@ ui <- fluidPage(
 )
 server <- function(input, output, session) {
   observeEvent(input$min, {
-    updateNumericInput(session, "n", min = input$min)
+    updateSliderInput(session, "n", min = input$min)
   })  
   observeEvent(input$max, {
-    updateNumericInput(session, "n", max = input$max)
+    updateSliderInput(session, "n", max = input$max)
   })
 }
 ```
@@ -62,7 +62,7 @@ To help you get the hang of the update functions, I'll show a couple more simple
 
 ### Simple uses
 
-The simplest uses of the update functions are to provide small conveniences for the user. For example, maybe you want to make it easy to reset parameters back to their initial value. The following snippet shows how you might combine an `actionButton()`, `observeEvent()` and `updateNumericInput()`, with the output shown in Figure \@ref(fig:update-reset).
+The simplest uses of the update functions are to provide small conveniences for the user. For example, maybe you want to make it easy to reset parameters back to their initial value. The following snippet shows how you might combine an `actionButton()`, `observeEvent()` and `updateSliderInput()`, with the output shown in Figure \@ref(fig:update-reset).
 
 ```{r}
 ui <- fluidPage(
@@ -74,9 +74,9 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   observeEvent(input$reset, {
-    updateNumericInput(session, "x1", value = 0)
-    updateNumericInput(session, "x2", value = 0)
-    updateNumericInput(session, "x3", value = 0)
+    updateSliderInput(session, "x1", value = 0)
+    updateSliderInput(session, "x2", value = 0)
+    updateSliderInput(session, "x3", value = 0)
   })
 }
 ```
@@ -522,11 +522,11 @@ There are two main ideas here:
 * Use tabset panel with hidden tabs.
 * Use `updateTabsetPanel()` to switch tabs from the server.
 
-This is a simple idea, but when combined with a little creativity, it gives you a considerable amount of power. The following two sections illustrate give a couple of small examples of how you might use it in practice.
+This is a simple idea, but when combined with a little creativity, it gives you a considerable amount of power. The following two sections illustrate a couple of small examples of how you might use it in practice.
 
 ### Conditional UI
 
-Imagine that you want an app that allows the user to simulate from the normal, uniform, and exponential distributions. Each distribution has different parameters, so we'll need some way to show different controls for different distributions. Here, I'll put the unique user interface for each distribution in its on `tabPanel()`, and then arrange the three tabs into a `tabsetPanel()`.
+Imagine that you want an app that allows the user to simulate from the normal, uniform, and exponential distributions. Each distribution has different parameters, so we'll need some way to show different controls for different distributions. Here, I'll put the unique user interface for each distribution in its own `tabPanel()`, and then arrange the three tabs into a `tabsetPanel()`.
 
 ```{r}
 parameter_tabs <- tagList(
@@ -581,7 +581,7 @@ server <- function(input, output, session) {
       exponential = rexp(input$n, input$rate)
     )
   })
-  output$hist <- renderPlot(hist(sample()))
+  output$hist <- renderPlot(hist(sample()), res = 96)
 }
 ```
 
@@ -831,7 +831,7 @@ server <- function(input, output, session) {
       space = 0, 
       axes = FALSE
     )
-  })
+  }, res = 96)
 }
 ```
 

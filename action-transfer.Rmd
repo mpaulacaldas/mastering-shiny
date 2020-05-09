@@ -64,7 +64,7 @@ Note my use of the `label` and `buttonLabel` arguments to mildly customise the a
 
 ### Uploading data {#uploading-data}
 
-If the user is uploading a dataset, there are three details that you need to be aware of:
+If the user is uploading a dataset, there are two details that you need to be aware of:
 
 * `input$file` is initialised to  `NULL` on page load, so you'll need
   `req(input$file)` to make sure your code waits until the first file is 
@@ -74,11 +74,11 @@ If the user is uploading a dataset, there are three details that you need to be 
   way is to supply a character vector of file extensions, like 
   `accept = ".csv"`. But the `accept` argument is only a suggestion to 
   the browser, and is not always enforced, so it's good practice to also
-  validate it (e.g. Section \@ref(validate)) the yourself. The easiest way 
+  validate it (e.g. Section \@ref(validate)) yourself. The easiest way 
   to get the file extension in R is `tools::file_ext()`, but note that it 
   strips the leading `.`.
 
-Putting all these ideas together gives us the following app where you can upload a `.csv` file and see the first `n` rows:
+Putting all these ideas together gives us the following app where you can upload a `.csv` or `.tsv` file and see the first `n` rows:
 
 ```{r}
 ui <- fluidPage(
@@ -192,7 +192,7 @@ Note the use of `validate()` to only allow the user to download datasets that ar
 
 ### Downloading reports
 
-As well downloading data, you may want the users of your app to download a report, that summarises the result of interactive exploration in the Shiny app. This is quite a lot of extra work, because you also need to display the same information in a different format, but it is very useful for high-stakes apps.
+As well as downloading data, you may want the users of your app to download a report that summarises the result of interactive exploration in the Shiny app. This is quite a lot of extra work, because you also need to display the same information in a different format, but it is very useful for high-stakes apps.
 
 One powerful way to generate such a report is with a parameterised RMarkdown document, <https://bookdown.org/yihui/rmarkdown/parameterized-reports.html>. A parameterised RMarkdown file has a `params` field in the YAML metadata:
 

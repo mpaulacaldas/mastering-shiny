@@ -4,7 +4,7 @@
 source("common.R")
 ```
 
-As your Shiny app grows you will find it increasingly hard to understand how all the pieces fit together. Or you might find yourself in a situation where fixing one problem immediately creates a new different problem, and you feel like you're playing wack-a-mole. Or maybe you find yourself spending forever scrolling up and down a veeeeeeery long `app.R` looking for the UI component you're thinking of. These are signs that it's time to break your app up into smaller independent pieces, or **modules**. 
+As your Shiny app grows you will find it increasingly hard to understand how all the pieces fit together. Or you might find yourself in a situation where fixing one problem immediately creates a new different problem, and you feel like you're playing whack-a-mole. Or maybe you find yourself spending forever scrolling up and down a veeeeeeery long `app.R` looking for the UI component you're thinking of. These are signs that it's time to break your app up into smaller independent pieces, or **modules**. 
 
 At the simplest level, a module is just a pair of UI and server functions that live in their own file. But these functions are specially designed to create **namespaces**. What's a namespace? So far, when writing an app, the "names" of the controls (the `id`s) are global: all parts of your server function can see all parts of your UI. Modules give you the ability to create controls that can only be seen from within the module. This is a called a namespace because it creates "spaces" of "names" that are isolated from the rest of the app.
 
@@ -64,7 +64,7 @@ server <- function(input, output, session) {
   data <- reactive(mtcars[[input$var]])
   output$hist <- renderPlot({
     hist(data(), breaks = input$bins, main = input$var)
-  })
+  }, res = 96)
 }
 ```
 
@@ -110,7 +110,7 @@ histogramServer <- function(id) {
     data <- reactive(mtcars[[input$var]])
     output$hist <- renderPlot({
       hist(data(), breaks = input$bins, main = input$var)
-    })
+    }, res = 96)
   })
 }
 ```
@@ -143,7 +143,7 @@ histogramApp <- function() {
   server <- function(input, output, session) {
     histogramServer("hist1")
   }
-  shinyApp(ui)  
+  shinyApp(ui, server)  
 }
 ```
 
@@ -166,7 +166,7 @@ The module UI and server differ slightly in how the namespacing is expressed:
   `input` and `output` so that your module code can only access elements with 
   the matching `id`. 
 
-Namespacing turns modules into black boxes. From outside of the module, you can't see any of inputs, outputs, or reactives inside of it. For example, take the app below. The output will never get updated because there is no `input$bins`; the `bins` input can only be seen inside of the `hist1` module.
+Namespacing turns modules into black boxes. From outside of the module, you can't see any of the inputs, outputs, or reactives inside of it. For example, take the app below. The output will never get updated because there is no `input$bins`; the `bins` input can only be seen inside of the `hist1` module.
 
 ```{r}
 ui <- fluidPage(
@@ -201,7 +201,7 @@ In this example, I've used a special naming scheme for all the components of the
 
 Sometimes a module with only an `id` argument to the module UI and server is useful because it allows you to isolate complex code in its own file. This is particularly useful for apps that aggregate independent components, such as a corporate dashboard where each tab shows tailored reports for each line of business. Here modules allow you to develop each piece in its own file, so that you don't need to worry about IDs clashing across components.
 
-However, most of the time your module UI and server will need additional arguments. Adding arguments to the module UI gives greater control over module appearance, allowing you to use the same module in more places in your app. But the module UI is just a regular R function, so there's relatively little specific to learn for Shiny, and much of it was already covered in Chapter \@ref(scaling-functions).
+However, most of the time your module UI and server will need additional arguments. Adding arguments to the module UI gives greater control over module appearance, allowing you to use the same module in more places in your app. But the module UI is just a regular R function, so there's relatively little to learn that's specific to Shiny, and much of it was already covered in Chapter \@ref(scaling-functions).
 
 In following sections, I'll focus on the module server, and discuss how your module can take additional reactive inputs and return one or more reactive outputs. Unlike regular Shiny code, connecting modules together requires you to be explicit about inputs and outputs. Initially, this need to be explicit is going to feel tiresome. And it's certainly more work than the usual free-form association allowed in the server function. But modules enforce specific lines of communication for a reason: they're a little more work to create, but much easier to understand.
 
@@ -522,7 +522,7 @@ histogramServer <- function(id, x, title = reactive("Histogram")) {
       req(is.numeric(x()))
       main <- paste0(title(), " [", input$bins, "]")
       hist(x(), breaks = input$bins, main = main)
-    })
+    }, res = 96)
   })
 }
 ```
@@ -552,26 +552,25 @@ histogramApp <- function() {
 ```
 
 :::sidebar
-Note that if you wanted to allow the module user to place the breaks control and histogram in different places of the app, you could return a named list.
+Note that if you wanted to allow the module user to place the breaks control and histogram in different places of the app, you could use multiple UI functions. It's not terribly useful here, but it's useful to see the basic approach.
 
 ```{r}
-histogramOutput <- function(id) {
-  list(
-    bins = numericInput(NS(id, "bins"), "bins", 10, min = 1, step = 1),
-    hist = plotOutput(NS(id, "hist"))
-  )
+histogramOutputBins <- function(id) {
+  numericInput(NS(id, "bins"), "bins", 10, min = 1, step = 1)
+}
+histogramOutputPlot <- function(id) {
+  plotOutput(NS(id, "hist"))
 }
 
-hist <- histogramOutput("hist")
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       datasetInput("data", is.data.frame),
       selectVarInput("var"),
-      hist$bins
+      histogramOutputBins("hist")
     ),
     mainPanel(
-      hist$hist
+      histogramOutputBins("hist")
     )
   )
 )
@@ -768,7 +767,7 @@ histogramServer <- function(id, df) {
     data <- reactive(df[[input$var]])
     output$hist <- renderPlot({
       hist(data(), breaks = input$bins, main = input$var)
-    })
+    }, res = 96)
   })
 }
 ```
@@ -862,15 +861,15 @@ In Shiny, UI and server are inherently disconnected; Shiny doesn't know which UI
       output$plot_carni <- renderPlot({
         ggplot(data = carni(), aes_string(x = input$x, y = input$y)) +
           geom_point()
-      })
+      }, res = 96)
       output$plot_omni <- renderPlot({
         ggplot(data = omni(), aes_string(x = input$x, y = input$y)) +
           geom_point()
-      })
+      }, res = 96)
       output$plot_herbi <- renderPlot({
         ggplot(data = herbi(), aes_string(x = input$x, y = input$y)) +
           geom_point()
-      })
+      }, res = 96)
     
     }
     

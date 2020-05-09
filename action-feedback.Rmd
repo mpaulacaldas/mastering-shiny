@@ -40,7 +40,7 @@ ui <- fluidPage(
 
 Then call one of the feedback functions in your server function. There are four variants: `feedback()`, `feedbackWarning()`, `feedbackDanger()`, and `feedbackSuccess()`. They all have three key arguments:
 
-* `inputId`, the id of the input where the feedback should be place.
+* `inputId`, the id of the input where the feedback should be placed.
 * `show`, a logical determining whether or not to show the feedback.
 * `text`, the text to display.
 
@@ -89,7 +89,7 @@ This need tends to crop up mainly with three controls:
 * In `textInput()`, you've used `value = ""`, and you don't want to do 
   anything until the user types something.
   
-* In `inputSelect()`, you've provide an empty choice, `""`, and you don't
+* In `selectInput()`, you've provide an empty choice, `""`, and you don't
   want to do anything until the user makes a selection.
   
 * In `fileInput()`, which has an empty result before the user has uploaded 
@@ -205,7 +205,7 @@ Both `exists()` and `cancelOutput = TRUE` are `r emo::ji("ok_hand")`
 
 shinyFeedback is great when the problem is related to a single input. But sometimes the invalid state is a result of a combination of inputs. In this case it doesn't really make sense to put the error next to an input (which one would you put it beside?) and instead it makes more sense to put it in the output. 
 
-You can do so with a tool built into shiny: `validate()`. When called inside a reactive or a output, `validate(message)` stops execution of the rest of the code and instead displays `message` in any downstream outputs. The following code shows a simple example where we don't want to log or square-root negative values.
+You can do so with a tool built into shiny: `validate()`. When called inside a reactive or an output, `validate(message)` stops execution of the rest of the code and instead displays `message` in any downstream outputs. The following code shows a simple example where we don't want to log or square-root negative values.
 
 ```{r}
 ui <- fluidPage(
@@ -324,7 +324,7 @@ server <- function(input, output, session) {
     id <- showNotification("Reading data...", duration = NULL, closeButton = FALSE)
     on.exit(removeNotification(id), add = TRUE)
     
-    read.csv(input$path)
+    read.csv(input$file$datapath)
   })
 }
 ```
@@ -376,7 +376,7 @@ server <- function(input, output, session) {
 
 For long-running tasks, the best type of feedback is a progress bar. As well as telling you where you are in the process, it also helps you estimate how much longer it's going to be: should you take a deep breath, go get a coffee, or come back tomorrow? In this section, I'll show two techniques for displaying progress bars, one built into Shiny, and one from the [waiter](https://waiter.john-coene.com/) package developed by John Coene. Both work roughly the same way, first creating an R6 object and then calling an update method after each step.
 
-Unfortunately both techniques suffer from the major drawback: to use a progress bar you need to be able to divide the a big task into a known number of small pieces that each take roughly the same amount of time. This is often hard, particularly since the underlying code is often written in C and it has no way to communicate progres updates to you. We are working on tools in the [progress package](https://github.com/r-lib/progress) so that packages like dplyr, readr, and vroom will generate progress bars that you can easily forward to Shiny. I'll update this chapter when that approach is mature enough to use.
+Unfortunately both techniques suffer from the same major drawback: to use a progress bar you need to be able to divide the big task into a known number of small pieces that each take roughly the same amount of time. This is often hard, particularly since the underlying code is often written in C and it has no way to communicate progres updates to you. We are working on tools in the [progress package](https://github.com/r-lib/progress) so that packages like dplyr, readr, and vroom will generate progress bars that you can easily forward to Shiny. I'll update this chapter when that approach is mature enough to use.
 
 ### Shiny
 
@@ -386,7 +386,7 @@ The following code block shows the basic lifecycle of a Shiny progress bar:
 # Create a progress bar object with `Progress$new(max = number_of_steps)`.
 progress <- Progress$new(max = 5)
 
-# Display the progress bar by calling the `$set()` message, 
+# Display the progress bar by calling the `$set()` method, 
 # providing a title for the progress bar in the `message` argument.
 progress$set(message = "Starting process")
 
@@ -469,7 +469,7 @@ The default display is a thin progress bar at the top of the page, but there are
 
     * `overlay`: an opaque progress bar that hides the whole page
     * `overlay-opacity`: a translucent progress bar that covers the whole page
-    * `overlay-percent`: an opaque progress bar that also displays numeric percentage.
+    * `overlay-percent`: an opaque progress bar that also displays a numeric percentage.
 
 *   And instead of showing a progress bar for the entire page, can overlay it 
     on an existing input or output by setting the `id` parameter, e.g.:
@@ -521,7 +521,7 @@ server <- function(input, output, session) {
     data.frame(x = runif(50), y = runif(50))
   })
   
-  output$plot <- renderPlot(plot(data()))
+  output$plot <- renderPlot(plot(data()), res = 96)
 }
 ```
 

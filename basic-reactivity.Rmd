@@ -18,7 +18,7 @@ library(shiny)
 
 ## The server function
 
-As you've seen, the guts of every Shiny app looks like this:
+As you've seen, the guts of every Shiny app look like this:
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -38,7 +38,7 @@ The previous chapter covered the basics of the front end, the `ui` object that c
 
 To achieve this independence, Shiny invokes your `server()` function each time a new session[^session] starts. Just like any other R function, when the server function is called it creates a new local environment that is independent of every other invocation of the function. This allows each session to have unique state, as well as isolating the variables created _inside_ the function. This is why almost all of the reactive programming you'll do in Shiny will be inside the server function[^exceptions]. 
 
-[^session]: Each connection to a Shiny app starts a new session whether its connections from different people, or with multiple tabs from the same person.
+[^session]: Each connection to a Shiny app starts a new session whether it's connections from different people, or with multiple tabs from the same person.
 
 [^exceptions]: The primary exception is where there's some work that can be shared across multiple users. For example, all users might be looking at the same large csv file, so you might as well load it once and share it between users. We'll come back to that idea in Chapter XYZ.
 
@@ -447,7 +447,7 @@ server <- function(input, output, session) {
     x2 <- rnorm(input$n2, input$mean2, input$sd2)
     
     histogram(x1, x2, binwidth = input$binwidth, xlim = input$range)
-  })
+  }, res = 96)
 
   output$ttest <- renderText({
     x1 <- rnorm(input$n1, input$mean1, input$sd1)
@@ -513,7 +513,7 @@ server <- function(input, output, session) {
 
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = input$binwidth, xlim = input$range)
-  })
+  }, res = 96)
 
   output$ttest <- renderText({
     t_test(x1(), x2())
@@ -550,7 +550,7 @@ server <- function(input, output, session) {
 
   output$hist <- renderPlot({
     histogram(x1, x2, binwidth = input$binwidth, xlim = input$range)
-  })
+  }, res = 96)
 
   output$ttest <- renderText({
     t_test(x1, x2)
@@ -569,7 +569,7 @@ server <- function(input, output, session) {
 
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = input$binwidth, xlim = input$range)
-  })
+  }, res = 96)
 
   output$ttest <- renderText({
     t_test(x1(), x2())
@@ -610,7 +610,7 @@ server <- function(input, output, session) {
   x2 <- reactive(rpois(input$n, input$lambda2))
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
-  })
+  }, res = 96)
 }
 ```
 
@@ -650,7 +650,7 @@ server <- function(input, output, session) {
   
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
-  })
+  }, res = 96)
 }
 ```
 ```{r sim-timer, echo = FALSE, out.width = NULL, fig.cap="`reactiveTimer(500)` introduces a new reactive input that automatically invalidates every half a second"}
@@ -693,7 +693,7 @@ server <- function(input, output, session) {
   })
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
-  })
+  }, res = 96)
 }
 ```
 
@@ -723,7 +723,7 @@ server <- function(input, output, session) {
 
   output$hist <- renderPlot({
     histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
-  })
+  }, res = 96)
 }
 ```
 
