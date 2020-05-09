@@ -173,16 +173,18 @@ server <- function(input, output, session) {
     ggplot(df, aes(x, y, size = dist)) + 
       geom_point() + 
       scale_size_area(limits = c(0, 1000), max_size = 10, guide = NULL)
-  })
+  }, res = 96)
 }
 ```
+
+<!-- TODO: Suggestion: Give another name to the reactive values object dist to avoid confusion with `stats::dist()`. -->
 
 There are two important ggplot2 techniques to note here:
 
 -   I add the distances to the data frame before plotting. I think it's good practice to put related variables together in a data frame before visualising it.
 -   I set the `limits` to `scale_size_area()` to ensure that sizes are comparable across clicks. To find the correct range I did a little interactive experimentation, but you can work out the exact details if needed (see the exercises at the end of the chapter).
 
-Here's a more complicated idea. I want to use a brush to select (and deselect) points on a plot. Here I display the selection using different colours, but you could imagine many other applications. To make this work, I initialise the `reactiveVal()` to a vector of `FALSE`s, then use `brushedPoints()` and `ifelse()` toggle their values: if they were previously excluded they'll be included; if they were previously included, they'll be excluded.
+Here's a more complicated idea. I want to use a brush to select (and deselect) points on a plot. Here I display the selection using different colours, but you could imagine many other applications. To make this work, I initialise the `reactiveVal()` to a vector of `FALSE`s, then use `brushedPoints()` and `ifelse()` to toggle their values: if they were previously excluded they'll be included; if they were previously included, they'll be excluded.
 
 ```{r}
 ui <- fluidPage(
@@ -365,19 +367,147 @@ You can learn more about `renderImage()`, and see other ways that you might use 
 ## Exercises
 
 1.  Make a plot with click handle that shows all the data returned in the input.
+    
+    ::: answer
+    ```{r, eval = FALSE}
+    ui <- fluidPage(
+      plotOutput("plot", click = "click"),
+      verbatimTextOutput("input")
+    )
+    server <- function(input, output, session) {
+      output$plot <- renderPlot({
+        ggplot(mtcars, aes(wt, mpg)) +
+          geom_point()
+      }, res = 96)
+      output$input <- renderPrint(input$click)
+    }
+    shinyApp(ui, server)
+    ```
+    :::
 
 2.  Make a plot with click, dblclick, hover, and brush output handlers and nicely display the current selection in the sidebar. Plot the plot in the main panel.
 
+    ::: answer
+    In this app, the user interacts with the plot in the main panel, and the selected data points are displayed in a table in the sidebar. On the UI side, I added a radio buttons menu so we can explore each mouse event on its own. On the server side, I made sure to dispatch `brushedPoints()` when the selection is made via the brush, and `nearPoints()` otherwise.
+    
+    ```{r, eval = FALSE}
+    ui <- fluidPage(
+      sidebarPanel(
+        radioButtons(
+          "opts", 
+          "Display selection made via",
+          c("click", "dblclick", "hover", "brush"),
+          inline = TRUE
+          ),
+        # some css so the table won't overflow
+        div(style = "overflow-x: scroll", tableOutput("data"))
+      ),
+      mainPanel(
+        plotOutput(
+          "plot", 
+          click = "click", 
+          dblclick = "dblclick", 
+          hover = "hover", 
+          brush = "brush"
+        )
+      )
+    )
+    server <- function(input, output, session) {
+      sel <- reactiveVal(rep(FALSE, nrow(mtcars)))
+      observeEvent(input$brush, {
+        req(input$opts == "brush")
+        sel(brushedPoints(mtcars, input$brush, allRows = TRUE)$selected_)
+      })
+      observeEvent(c(input$click, input$dblclick, input$hover), {
+        req(input$opts != "brush")
+        sel(nearPoints(mtcars, input[[input$opts]], allRows = TRUE)$selected_)
+      })
+      output$data <- renderTable({
+        req(sel())
+        mtcars[sel(), ]
+      })
+      output$plot <- renderPlot({
+        ggplot(mtcars, aes(wt, mpg)) +
+          geom_point()
+      }, res = 96)
+    }
+    shinyApp(ui, server)
+    ```
+    
+    There is scope for some refactoring in the server code since the arguments to `brushedPoints()` and `nearPoints()` are the same. Here, I use `do.call()` to call a function `fun`, which is determined by a condition on `input$opts` (the mouse event chosen by the user).
+    
+    ```{r, eval = FALSE}
+    server <- function(input, output, session) {
+      sel <- reactiveVal(rep(FALSE, nrow(mtcars)))
+      observeEvent(c(input$click, input$dblclick, input$hover, input$brush), {
+        fun <- if (input$opts == "brush") "brushedPoints" else "nearPoints"
+        sel(do.call(fun, list(mtcars, input[[input$opts]], allRows = TRUE))$selected_)
+      })
+      output$data <- renderTable({
+        req(sel())
+        mtcars[sel(), ]
+      })
+      output$plot <- renderPlot({
+        ggplot(mtcars, aes(wt, mpg)) +
+          geom_point()
+      }, res = 96)
+    }
+    ```
+    :::
+
 3.  Compute the limits of the distance scale using the size of the plot.
 
-```{r}
-output_size <- function(id) {
-  reactive(c(
-    session$clientData[[paste0("output_", id, "_width")]],
-    session$clientData[[paste0("output_", id, "_height")]]
-  ))
-}
-```
+    ```{r}
+    output_size <- function(id) {
+      reactive(c(
+        session$clientData[[paste0("output_", id, "_width")]],
+        session$clientData[[paste0("output_", id, "_height")]]
+      ))
+    }
+    ```
+
+    ::: answer
+    According to ?shiny::session`, the `output_outputId_width` and `output_outputId_height` elements of `session$clientData` return the dimensions of the DOM element that is bound to `outputId`.
+    
+    We can use the information returned by `session$clientData$output_plot_*` to improve the bubble plot example presented before in the chapter. In that example, the `limits` parameter of `scale_size_area()` was set to `c(0, 1000)`; a value that was chosen through interactive experimentation. According to `?scale_size_area`, `limits` also accepts a function that returns new limits. This means we can pass `output_size("plot")` to the parameter, which will ensure that the limits of the scale range adapt to the size of the plot. 
+    
+    Below is the updated example. For illustration purposes, I also print the value returned by `output_size("plot")()`. If we change the size of the window, we can see that the dimensions of the plot change as well.
+    
+    ```{r, eval = FALSE}
+    df <- data.frame(x = rnorm(100), y = rnorm(100))
+    
+    ui <- fluidPage(
+      plotOutput("plot", click = "plot_click"),
+      verbatimTextOutput("size")
+    )
+    server <- function(input, output, session) {
+      output_size <- function(id) {
+        reactive(c(
+          session$clientData[[paste0("output_", id, "_width")]],
+          session$clientData[[paste0("output_", id, "_height")]]
+        ))
+      }
+      dist <- reactiveVal(rep(1, nrow(df)))
+      observeEvent(input$plot_click,
+        dist(nearPoints(df, input$plot_click, allRows = TRUE, addDist = TRUE)$dist_)
+      )
+      output$plot <- renderPlot({
+        df$dist <- dist()
+        ggplot(df, aes(x, y, size = dist)) + 
+          geom_point() + 
+          scale_size_area(
+            output_size("plot"), # this is a function
+            max_size = 10, 
+            guide = NULL
+            )
+        }, res = 96)
+      output$size <- renderPrint({
+        output_size("plot")() # this is a value
+      })
+    }
+    shinyApp(ui, server)
+    ```
+    :::
 
 [^1]: Shiny didn't support touch events when I wrote this chapter, but it might by the time you read this.
 
