@@ -434,7 +434,7 @@ You can learn more about `renderImage()`, and see other ways that you might use 
     shinyApp(ui, server)
     ```
     
-    There is scope for some refactoring in the server code since the arguments to `brushedPoints()` and `nearPoints()` are the same. Here, I use `do.call()` to call a function `fun`, which is determined by a condition on `input$opts` (the mouse event chosen by the user).
+    There is scope for some refactoring in the server code since the arguments to `brushedPoints()` and `nearPoints()` are the same. For example, I could have used `do.call()` to call the appropriate function given the value taken by `input$opts`.
     
     ```{r, eval = FALSE}
     server <- function(input, output, session) {
@@ -467,9 +467,9 @@ You can learn more about `renderImage()`, and see other ways that you might use 
     ```
 
     ::: answer
-    According to ?shiny::session`, the `output_outputId_width` and `output_outputId_height` elements of `session$clientData` return the dimensions of the DOM element that is bound to `outputId`.
+    According to `?shiny::session`, the `output_outputId_width` and `output_outputId_height` elements of `session$clientData` return the dimensions of the DOM element that is bound to `outputId`.
     
-    We can use the information returned by `session$clientData$output_plot_*` to improve the bubble plot example presented before in the chapter. In that example, the `limits` parameter of `scale_size_area()` was set to `c(0, 1000)`; a value that was chosen through interactive experimentation. According to `?scale_size_area`, `limits` also accepts a function that returns new limits. This means we can pass `output_size("plot")` to the parameter, which will ensure that the limits of the scale range adapt to the size of the plot. 
+    We can use the information returned by `session$clientData$output_plot_*` to improve the bubble plot example presented before in the chapter. In that example, the `limits` parameter of `scale_size_area()` was set to `c(0, 1000)`; a value that was chosen through interactive experimentation. According to `?ggplot2::scale_size_area`, `limits` also accepts a function. This means we can pass `output_size("plot")` to the parameter, which will ensure that the limits of the scale range adapt to the size of the plot. 
     
     Below is the updated example. For illustration purposes, I also print the value returned by `output_size("plot")()`. If we change the size of the window, we can see that the dimensions of the plot change as well.
     
