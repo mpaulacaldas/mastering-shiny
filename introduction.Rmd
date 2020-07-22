@@ -47,6 +47,10 @@ People use Shiny to:
 * Create interactive demos for teaching statistics and data science concepts 
   that allow learners to tweak inputs and observe the downstream effects of 
   these changes in an analysis.
+  
+* Leverage automation processes by making them usable by users with no programming skills.  
+
+* Create prototype of web application, as the development in R is often much faster but difficult to scale.
 
 In short, Shiny gives you the ability to pass on some of your R superpowers to anyone who can use a web browser. 
 
@@ -97,7 +101,7 @@ The book is divided into five parts:
 
 ## What won't you learn?
 
-The focus of this book is making effective Shiny apps and understanding the underlying theory of reactivity. I'll do my best to show case best practices for data science, R programming, and software engineering, but you'll need other references to master these important skillsets. If you enjoy my writing in this book, you might enjoy my other books on these topics: [R for data science](http://r4ds.had.co.nz/), [Advanced R](http://adv-r.hadley.nz/), and [R packages](http://r-pkgs.org/).
+The focus of this book is making effective Shiny apps and understanding the underlying theory of reactivity. I'll do my best to showcase best practices for data science, R programming, and software engineering, but you'll need other references to master these important skillsets. If you enjoy my writing in this book, you might enjoy my other books on these topics: [R for data science](http://r4ds.had.co.nz/), [Advanced R](http://adv-r.hadley.nz/), and [R packages](http://r-pkgs.org/).
 
 ## Prerequisites {#prerequisites}
 
@@ -190,7 +194,7 @@ cat(".\n")
 
 ## Colophon
 
-This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](http://mastering-shiny.org/) is hosted with [netlify](http://netlify.com/), and automatically updated after every commit by [travis-ci](https://travis-ci.org/). The complete source is available from [GitHub](https://github.com/hadley/mastering-shiny). 
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](http://mastering-shiny.org/) is hosted with [netlify](http://netlify.com/), and automatically updated after every commit by [Github Actions](https://github.com/features/actions). The complete source is available from [GitHub](https://github.com/hadley/mastering-shiny). 
 
 This version of the book was built with `r R.version.string` and the following packages:
 

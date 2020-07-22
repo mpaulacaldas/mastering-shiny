@@ -6,8 +6,10 @@ Imports:
     ggforce,
     openintro,
     shiny,
+    shinycssloaders,
     shinyFeedback,
     shinythemes,
+    thematic (>= 0.0.1),
     tidyverse,
     vroom,
     waiter,
@@ -22,6 +24,9 @@ Suggests:
     webshot (>= 0.5.0.9000)
 Encoding: UTF-8
 Remotes: 
-    JohnCoene/waiter,
-    merlinoa/shinyFeedback,
     hadley/emo
+    rstudio/shiny,
+    rstudio/thematic,
+    rstudio/htmltools,
+    rstudio/bookdown,
+    r-lib/testthat
